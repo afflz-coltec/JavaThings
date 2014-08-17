@@ -29,9 +29,6 @@ public class Client implements Runnable {
         this.input = new DataInputStream(socket.getInputStream());
         this.output = new DataOutputStream(socket.getOutputStream());
         
-        Thread MessageGetter = new Thread(this);
-        MessageGetter.start();
-        
     }
     
     public void sendMessage(String message) throws IOException {
