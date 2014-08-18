@@ -150,7 +150,12 @@ public class ClientUI extends javax.swing.JFrame {
                 throw new EmptyFieldException();
             }
             
-            this.client = new Client( jAddress.getText() , Integer.parseInt(this.jPort.getText()));
+            if ( this.client == null ) {
+                this.client = new Client( jAddress.getText() , Integer.parseInt(this.jPort.getText()));
+            }
+            else {
+                JOptionPane.showMessageDialog(this, "Connection already established!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
             
             this.MessageGetter = new Thread(client);
             
