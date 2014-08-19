@@ -44,6 +44,7 @@ public class Main {
             // Disparando uma thread para aceitar uma nova conexão
             Thread t = new Thread(cliente);
             t.start();
+            
          }
 
        } catch (IOException e) {
