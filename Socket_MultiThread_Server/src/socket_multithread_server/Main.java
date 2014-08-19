@@ -39,7 +39,7 @@ public class Main {
             // Iniciando o cliente
             Client cliente = new Client((server.accept()));
             Socket socket = cliente.getSocket();
-            System.out.println("CLIENTE.>" + socket.getInetAddress().getHostAddress() + ":" + socket.getLocalPort() + " (" + socket.getInetAddress().getCanonicalHostName() + ")");
+            System.out.println("CLIENTE>" + socket.getInetAddress().getHostAddress() + ":" + socket.getLocalPort() + " (" + socket.getInetAddress().getCanonicalHostName() + ")");
 
             // Disparando uma thread para aceitar uma nova conexão
             Thread t = new Thread(cliente);
