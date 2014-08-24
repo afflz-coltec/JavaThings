@@ -6,10 +6,14 @@
 
 package chat_server.client;
 
+import chat_server.protocol.Message;
+import chat_server.utils.MessageUtils;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -21,6 +25,7 @@ public class Client implements Runnable {
     private DataInputStream input;
     private DataOutputStream output;
     private int ClientID;
+    private boolean isConnected = false;
     
     private static int lastID = 0;
     
@@ -44,6 +49,46 @@ public class Client implements Runnable {
     
     @Override
     public void run() {
+        
+        //System.out.println("WELCOME> Cliente ID " + this.ClientID + " entrou. (" + socket.getInetAddress().getHostAddress() + ")");
+        
+        while (true) {
+            
+            boolean isReady = false;
+            byte service;
+            byte[] size = new byte[4];
+            byte[] data;
+            //byte[] checksum = new byte[2];
+            
+            do {
+                
+                try {
+                    
+                    service = this.input.readByte();
+                    size[0] = this.input.readByte();
+                    size[1] = this.input.readByte();
+                    size[2] = this.input.readByte();
+                    size[3] = this.input.readByte();
+                    data = new byte[MessageUtils.byteVectorToInteger(size)];
+                    
+                    for ( int i=0;i<MessageUtils.byteVectorToInteger(size);i++ ) {
+                        data[i] = this.input.readByte();
+                    }
+                    
+                    //checksum[0] = this.input.readByte();
+                    //checksum[1] = this.input.readByte();
+                    
+                } catch (IOException ex) {
+                    System.out.println("CLOSE> Client ID " + this.ClientID + " left. ("   + socket.getInetAddress().getHostAddress() + ")");
+                    return;
+                }
+                
+                Message msg = new Message(service, size, data);
+                msg.printMsg();
+                
+            } while(!isReady);
+            
+        }
         
     }
     

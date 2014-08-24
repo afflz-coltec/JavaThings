@@ -4,9 +4,7 @@
  * and open the template in the editor.
  */
 
-package chat_server.protocol;
-
-import chat_server.utils.MessageUtils;
+package chat_client.protocol;
 
 /**
  *
@@ -40,28 +38,12 @@ public class Message {
     private byte[] data;
     private byte[] checksum;
     
-    public Message(byte service,byte[] size,byte[] data) {
+    private boolean isValid = false;
+    
+    public Message(byte service,byte[] size, byte[] data) {
         this.service = service;
         this.size = size;
         this.data = data;
-        //this.checksum = checksum;
-    }
-    
-    public void printMsg() {
-        System.out.print(String.format("%02X ", this.service));
-        for ( byte b : this.size ) {
-            System.out.print(String.format("%02X ", b));
-        }
-        for ( byte b : this.data ) {
-            System.out.print(String.format("%02X ", b));
-        }
-        //for ( byte b : this.checksum ) {
-        //    System.out.print(" " + b);
-        //}
-        
-        System.out.print( " " + MessageUtils.byteVectorToInteger(this.size));
-        
-        System.out.print( " " + MessageUtils.byteVectorToString(this.data));
     }
     
 }

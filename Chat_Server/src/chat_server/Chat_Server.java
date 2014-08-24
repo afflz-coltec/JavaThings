@@ -22,6 +22,8 @@ public class Chat_Server {
             + "\t-p --port\tSets the port to run the chat server\n"
             + "\t-h --help -?\tPrint this help message"
             + "\n";
+    
+    private static final int DEFAULT_PORT = 8885;
 
     /**
      * @param args the command line arguments
@@ -42,7 +44,9 @@ public class Chat_Server {
             
             if (args.length == 0) {
                 
-                Server server = new Server(8885);
+                Server server = new Server(DEFAULT_PORT);
+                
+                server.startServer();
 
             } else {
 
@@ -65,6 +69,8 @@ public class Chat_Server {
 
                         // TODO: Create and start server.
                         Server server = new Server(port);
+                        
+                        server.startServer();
                         
                         break;
 
