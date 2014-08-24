@@ -7,10 +7,7 @@
 package chat_server.server;
 
 import chat_server.client.Client;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -29,7 +26,6 @@ public class ClientManager implements Runnable {
     
     @Override
     public void run() {
-       
         
     }
     
