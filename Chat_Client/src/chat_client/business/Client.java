@@ -46,15 +46,6 @@ public class Client implements Runnable {
         String mens = MessageUtils.byteVectorToString(data);
     }
     
-    public static void main(String[] args) {
-        try {
-        Client client = new Client("10.0.0.23", 8885);
-        }
-        catch ( IOException e ) {
-            
-        }
-    }
-    
     public String getMessages() {
         return this.message;
     }
