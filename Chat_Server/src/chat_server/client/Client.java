@@ -7,6 +7,7 @@
 package chat_server.client;
 
 import chat_server.protocol.Message;
+import chat_server.server.ClientManager;
 import chat_server.utils.MessageUtils;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -41,6 +42,8 @@ public class Client implements Runnable {
         this.output = new DataOutputStream(socket.getOutputStream());
         this.ClientID = ++lastID;
         
+        ClientManager.addClient(this);
+        
     }
     
     public Socket getSocket() {
@@ -58,7 +61,7 @@ public class Client implements Runnable {
             byte service;
             byte[] size = new byte[4];
             byte[] data;
-            //byte[] checksum = new byte[2];
+            byte[] checksum = new byte[2];
             
             do {
                 
@@ -75,8 +78,8 @@ public class Client implements Runnable {
                         data[i] = this.input.readByte();
                     }
                     
-                    //checksum[0] = this.input.readByte();
-                    //checksum[1] = this.input.readByte();
+                    checksum[0] = this.input.readByte();
+                    checksum[1] = this.input.readByte();
                     
                 } catch (IOException ex) {
                     System.out.println("CLOSE> Client ID " + this.ClientID + " left. ("   + socket.getInetAddress().getHostAddress() + ")");
