@@ -32,7 +32,7 @@ public class Message {
         ExistentClient
     }
     
-    private static final byte[] SERVICES = {0x01,0x02,0x03,0x04,0x05,0x0A};
+    private static final byte[] SERVICES = {0x01,0x02,0x03,0x04,0x05,0x0A,0x7F};
     private static final byte[] NACKS    = {(byte)0xFF,(byte)0xEE,(byte)0xDD,(byte)0xCC,(byte)0xBB};
     
     private byte service;
@@ -45,6 +45,41 @@ public class Message {
         this.size = size;
         this.data = data;
         this.checksum = checksum;
+    }
+    
+    public int getSize() {
+        return MessageUtils.byteVectorToInteger(this.size);
+    }
+    
+    public String getData() {
+        return MessageUtils.byteVectorToString(this.data);
+    }
+    
+    public Services getService() {
+        
+        Services s = null;
+        
+        switch(this.service) {
+            case (byte)0x01:
+                s =  Services.HelloService;
+                
+            case (byte)0x02:
+                s =  Services.ChangeNickService;
+                
+            case (byte)0x03:
+                s =  Services.ChangeNickService;
+                
+            case (byte)0x04:
+                s =  Services.ChangeNickService;
+                
+            case (byte)0x05:
+                s =  Services.ChangeNickService;
+                
+            case (byte)0x0A:
+                s =  Services.ChangeNickService;
+        }
+        
+        return s;
     }
     
     public static int getCheckSum(Message msg) {
