@@ -46,4 +46,18 @@ public class Message {
         this.data = data;
     }
     
+    public static int getCheckSum(Message msg) {
+        
+        int cs = (int) msg.service & 0xFF;
+        cs +=    (int)(msg.size[0] >> 8) & 0xFF;
+        cs +=    (int)(msg.size[1] >> 0) & 0xFF;
+        
+        for ( int i=0;i<msg.data.length;i++ ) {
+            cs += ((int)msg.data[i] & 0xFF);
+        }
+        
+        return cs;
+        
+    }
+    
 }
