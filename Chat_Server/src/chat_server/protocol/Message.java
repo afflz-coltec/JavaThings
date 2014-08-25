@@ -47,7 +47,7 @@ public class Message {
         //this.checksum = checksum;
     }
     
-    public int getCheckSum(Message msg) {
+    public static int getCheckSum(Message msg) {
         
         int cs = (int)msg.service & 0xFF;
         cs +=    (int)(msg.size[0] >> 8) & 0xFF;
