@@ -7,10 +7,8 @@
 package chat_server.server;
 
 import chat_server.client.Client;
-import java.io.IOException;
+import chat_server.protocol.Message;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -20,11 +18,42 @@ public class ClientManager implements Runnable {
 
     private static ArrayList<Client> clientList = new ArrayList<>();
     private static ArrayList<byte[]> msgList = new ArrayList<>();
+    private static ArrayList<String> nickList = new ArrayList<>();
     
     public ClientManager() { }
     
     public static void addClient(Client c) {
         clientList.add(c);
+    }
+    
+    public void MessageHandler(Message msg, Client c) {
+        
+        switch(msg.getService()) {
+            
+            case HelloService:
+                if ( (msg.getSize() == msg.getData().length()) && !c.isConnected() ) {
+                    c.setNickName(msg.getData());
+                    c.setConnected();
+                }
+                break;
+                
+            case ChangeNickService:
+                break;
+                
+            case ConnectedClientsService:
+                break;
+                
+            case GetNickService:
+                break;
+                
+            case SendMsgService:
+                break;
+                
+            case ByeService:
+                break;
+            
+        }
+        
     }
     
     @Override
