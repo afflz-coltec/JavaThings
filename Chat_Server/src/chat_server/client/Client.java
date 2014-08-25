@@ -25,10 +25,11 @@ public class Client implements Runnable {
     private Socket socket;
     private DataInputStream input;
     private DataOutputStream output;
+    
     private int ClientID;
     private boolean isConnected = false;
-    
     private static int lastID = 0;
+    private String NickName;
     
     /**
      * Creates a Client object that represents the connection of a server's client.
@@ -46,8 +47,20 @@ public class Client implements Runnable {
         
     }
     
+    public boolean isConnected() {
+        return this.isConnected;
+    }
+    
     public Socket getSocket() {
         return this.socket;
+    }
+    
+    public void setNickName(String nick) {
+        this.NickName = nick;
+    }
+    
+    public void setConnected() {
+        this.isConnected = true;
     }
     
     @Override
