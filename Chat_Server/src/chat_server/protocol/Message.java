@@ -49,7 +49,7 @@ public class Message {
     
     public static int getCheckSum(Message msg) {
         
-        int cs = (int)msg.service & 0xFF;
+        int cs = (int) msg.service & 0xFF;
         cs +=    (int)(msg.size[0] >> 8) & 0xFF;
         cs +=    (int)(msg.size[1] >> 0) & 0xFF;
         
