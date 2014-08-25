@@ -40,11 +40,11 @@ public class Message {
     private byte[] data;
     private byte[] checksum;
     
-    public Message(byte service,byte[] size,byte[] data) {
+    public Message(byte service,byte[] size,byte[] data, byte[] checksum) {
         this.service = service;
         this.size = size;
         this.data = data;
-        //this.checksum = checksum;
+        this.checksum = checksum;
     }
     
     public static int getCheckSum(Message msg) {
@@ -69,9 +69,9 @@ public class Message {
         for ( byte b : this.data ) {
             System.out.print(String.format("%02X ", b));
         }
-        //for ( byte b : this.checksum ) {
-        //    System.out.print(" " + b);
-        //}
+        for ( byte b : this.checksum ) {
+            System.out.print(String.format("%02X ", b));
+        }
         
         System.out.print( " " + MessageUtils.byteVectorToInteger(this.size));
         

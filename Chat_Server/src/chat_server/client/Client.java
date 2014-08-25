@@ -61,7 +61,7 @@ public class Client implements Runnable {
             byte service;
             byte[] size = new byte[4];
             byte[] data;
-            byte[] checksum = new byte[2];
+            byte[] checksum = new byte[4];
             
             do {
                 
@@ -80,13 +80,15 @@ public class Client implements Runnable {
                     
                     checksum[0] = this.input.readByte();
                     checksum[1] = this.input.readByte();
+                    checksum[2] = this.input.readByte();
+                    checksum[3] = this.input.readByte();
                     
                 } catch (IOException ex) {
                     System.out.println("CLOSE> Client ID " + this.ClientID + " left. ("   + socket.getInetAddress().getHostAddress() + ")");
                     return;
                 }
                 
-                Message msg = new Message(service, size, data);
+                Message msg = new Message(service, size, data,checksum);
                 msg.printMsg();
                 
             } while(!isReady);

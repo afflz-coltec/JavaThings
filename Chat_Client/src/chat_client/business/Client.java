@@ -6,6 +6,7 @@
 
 package chat_client.business;
 
+import chat_client.protocol.Message;
 import chat_client.utils.MessageUtils;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -38,12 +39,14 @@ public class Client implements Runnable {
         for ( byte b : size ) {
             this.output.writeByte(b);
         }
-        int tamanho = MessageUtils.byteVectorToInteger(size);
         byte[] data = MessageUtils.stringToByteVector(message);
         for ( byte b : data ) {
             this.output.writeByte(b);
         }
-        String mens = MessageUtils.byteVectorToString(data);
+        byte[] checksum = MessageUtils.integerToByteVector(Message.getCheckSum(new Message((byte)0x01, size, data)));
+        for ( byte b : checksum ) {
+            this.output.writeByte(b);
+        }
     }
     
     public String getMessages() {
