@@ -64,6 +64,10 @@ public class Message {
                 case 0x7F:
                     s = DeniedService;
                     break;
+                    
+                default:
+                    s = SendMsgService;
+                    break;
             }
             
             return s;

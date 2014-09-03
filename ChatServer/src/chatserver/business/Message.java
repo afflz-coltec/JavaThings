@@ -97,6 +97,15 @@ public class Message {
         return this.data;
     }
     
+    public static void printMessage(byte[] msg) {
+        
+        for ( byte b : msg )
+            System.out.print(String.format("%02X ", b));
+        
+        System.out.println();
+        
+    }
+    
     public static int getCheckSum(Message msg) {
         
         int checksum = (int)msg.service & 0xFF;
@@ -119,7 +128,7 @@ public class Message {
         
         messageAsByte[0] = msg.service;
         messageAsByte[1] = (byte)(msg.size >> 8);
-        messageAsByte[1] = (byte)(msg.size >> 0);
+        messageAsByte[2] = (byte)(msg.size >> 0);
         
         System.arraycopy(msg.data, 0, messageAsByte, 3, msg.size);
         

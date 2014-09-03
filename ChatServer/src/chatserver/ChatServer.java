@@ -87,7 +87,6 @@ public class ChatServer {
             
         } catch (IOException ex) {
             Logger.getLogger(ChatServer.class.getName()).log(Level.SEVERE, null, ex);
-            
         }
     }
     

@@ -3,18 +3,17 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package chatclient.gui;
 
 import chatclient.business.Client;
-import chatclient.exceptions.EmptyFieldException;
+import chatclient.business.MessageHandler;
 import chatclient.exceptions.NoConnectionEstablished;
+import com.sun.management.jmx.Trace;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
-import javax.swing.UIManager;
 
 /**
  *
@@ -25,8 +24,55 @@ public class ClientUI extends javax.swing.JFrame {
     /**
      * Creates new form ClientUI
      */
-    public ClientUI() {
+    public ClientUI(Client c, final MessageHandler msgHandler) {
         initComponents();
+        this.client = c;
+        this.msgHandler = msgHandler;
+
+        this.messageUpdaterThread = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                while (true) {
+                    synchronized (msgHandler) {
+                        try {
+                            msgHandler.wait();
+                            jMessages.setText(jMessages.getText() + MessageHandler.getMessage());
+                        } catch (InterruptedException e) {
+
+                        }
+                    }
+                }
+            }
+        });
+
+        this.messageUpdaterThread.start();
+      
+        this.onlineClientsThread = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                
+                while(true) {
+                    
+                    try {
+                        client.requestClientIDs();
+                        Thread.sleep(60000);
+                    }
+                    catch ( InterruptedException e ) {
+                        
+                    }
+                    catch ( IOException e ) {
+                        Logger.getLogger(ClientUI.class.getName()).log(Level.SEVERE, null, e);
+                    }
+                    
+                }
+                
+            }
+        });
+        
+        this.onlineClientsThread.start();
+
     }
 
     /**
@@ -38,39 +84,38 @@ public class ClientUI extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPanel1 = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
-        jAddress = new javax.swing.JTextField();
-        jLabel2 = new javax.swing.JLabel();
-        jPort = new javax.swing.JTextField();
-        jConnect = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
+        jPanel2 = new javax.swing.JPanel();
+        jScrollPane4 = new javax.swing.JScrollPane();
         jMessages = new javax.swing.JTextPane();
-        jSend = new javax.swing.JButton();
-        jScrollPane3 = new javax.swing.JScrollPane();
-        jSender = new javax.swing.JTextArea();
-        jScrollPane2 = new javax.swing.JScrollPane();
+        jSender = new javax.swing.JTextField();
+        jScrollPane5 = new javax.swing.JScrollPane();
         jClients = new javax.swing.JTextPane();
-        jLabel3 = new javax.swing.JLabel();
-        jNick = new javax.swing.JTextField();
+        jSend = new javax.swing.JButton();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        jMenu1 = new javax.swing.JMenu();
+        jDisconnect = new javax.swing.JMenuItem();
+        jMenu2 = new javax.swing.JMenu();
+        jMenuItem3 = new javax.swing.JMenuItem();
+        jMenuItem2 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Chat Client");
         setResizable(false);
-
-        jLabel1.setText("IP:");
-
-        jLabel2.setText("Port:");
-
-        jConnect.setText("Connect");
-        jConnect.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jConnectActionPerformed(evt);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
             }
         });
 
-        jMessages.setEditable(false);
-        jScrollPane1.setViewportView(jMessages);
+        jScrollPane4.setViewportView(jMessages);
+
+        jSender.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                jSenderKeyReleased(evt);
+            }
+        });
+
+        jScrollPane5.setViewportView(jClients);
 
         jSend.setText("Send");
         jSend.addActionListener(new java.awt.event.ActionListener() {
@@ -79,234 +124,209 @@ public class ClientUI extends javax.swing.JFrame {
             }
         });
 
-        jSender.setColumns(20);
-        jSender.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        jSender.setLineWrap(true);
-        jSender.setRows(5);
-        jSender.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                jSenderKeyReleased(evt);
-            }
-        });
-        jScrollPane3.setViewportView(jSender);
-
-        jScrollPane2.setViewportView(jClients);
-
-        jLabel3.setText("Nick");
-
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jAddress, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jPort, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel3)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jNick, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jScrollPane3))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2)
-                    .addComponent(jConnect, javax.swing.GroupLayout.DEFAULT_SIZE, 122, Short.MAX_VALUE)
-                    .addComponent(jSend, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 492, Short.MAX_VALUE)
+                    .addComponent(jSender))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(jSend, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)
+                    .addComponent(jScrollPane5))
                 .addContainerGap())
         );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(jPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jConnect)
-                    .addComponent(jAddress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel3)
-                    .addComponent(jNick, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(5, 5, 5)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 160, Short.MAX_VALUE)
-                    .addComponent(jScrollPane2))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jSend, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
+                    .addComponent(jScrollPane5))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jSender, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jSend))
+                .addContainerGap())
         );
+
+        jMenu1.setText("File");
+
+        jDisconnect.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F4, java.awt.event.InputEvent.ALT_MASK));
+        jDisconnect.setText("Disconnect");
+        jDisconnect.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jDisconnectActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jDisconnect);
+
+        jMenuBar1.add(jMenu1);
+
+        jMenu2.setText("Help");
+
+        jMenuItem3.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F1, 0));
+        jMenuItem3.setText("Usage");
+        jMenu2.add(jMenuItem3);
+
+        jMenuItem2.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_H, java.awt.event.InputEvent.CTRL_MASK));
+        jMenuItem2.setText("About");
+        jMenu2.add(jMenuItem2);
+
+        jMenuBar1.add(jMenu2);
+
+        setJMenuBar(jMenuBar1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jConnectActionPerformed
-        
+    private void jSenderKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jSenderKeyReleased
+        // TODO add your handling code here:
         try {
-            if ( jAddress.getText().equalsIgnoreCase("") || jPort.getText().equalsIgnoreCase("") ) {
-                throw new EmptyFieldException();
-            }
             
-            if ( this.client == null ) {
-                this.client = new Client( jAddress.getText() , Integer.parseInt(this.jPort.getText()), jNick.getText());
-            }
-            else {
-                JOptionPane.showMessageDialog(this, "Connection already established!", "Error", JOptionPane.ERROR_MESSAGE);
-            }
-            
-            this.MessageGetter = new Thread(client);
-            
-            this.MessageGetter.start();
-            
-            this.updateMessage = new Thread( new Runnable() {
+            if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
 
-                @Override
-                public void run() {
-                    
-                    while ( true ) {
-                        synchronized(client) {
-                            try {
-                                client.wait();
-                            }
-                            catch ( InterruptedException e ) {
-                                
-                            }
-                            jMessages.setText(client.getMessages());
-                        }
-                    }
-                    
+                if (this.client == null) {
+                    throw new NoConnectionEstablished();
                 }
+                this.lastMessage = jSender.getText();
+                jMessages.setText(jMessages.getText() + this.client.DecodeUserMessage(this.lastMessage.trim()));
+                this.jSender.setText(null);
                 
-            });
+            }
+            else if (evt.getKeyCode() == KeyEvent.VK_UP ) {
+                this.jSender.setText(this.lastMessage);
+            }
             
-            jMessages.setText("Connection established!\n");
+        } catch (IOException e) {
+
+        } catch (NoConnectionEstablished e) {
+            JOptionPane.showMessageDialog(this, "No connection established!");
+            jSender.setText("");
         }
-        catch ( IOException e ) {
-            
-        }
-        catch ( EmptyFieldException e ) {
-            JOptionPane.showMessageDialog(this, "Fill all the blanks!", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-        
-        this.updateMessage.start();
-        
-    }//GEN-LAST:event_jConnectActionPerformed
+
+    }//GEN-LAST:event_jSenderKeyReleased
 
     private void jSendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jSendActionPerformed
+        // TODO add your handling code here:
+
         try {
-            
-            if ( this.client == null ) {
+
+            if (this.client == null) {
                 throw new NoConnectionEstablished();
             }
-            
-            this.client.sendMessage("Farmer: " + jSender.getText() + "\n");
+            this.lastMessage = jSender.getText();
+            jMessages.setText(jMessages.getText() + this.client.DecodeUserMessage(this.lastMessage));
             jSender.setText(null);
+            
+        } catch (IOException ex) {
+            Logger.getLogger(ClientUI.class.getName()).log(Level.SEVERE, null, ex);
+            
+        } catch (NoConnectionEstablished e) {
+            JOptionPane.showMessageDialog(this, "No connection established!");
+            jSender.setText("");
+        }
+
+    }//GEN-LAST:event_jSendActionPerformed
+
+    private void jDisconnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jDisconnectActionPerformed
+        // TODO add your handling code here:
+        
+        try {
+            this.client.sendGoodbye();
+        }
+        catch ( IOException ex ) {
+            Logger.getLogger(ClientUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        this.setVisible(false);
+        
+    }//GEN-LAST:event_jDisconnectActionPerformed
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        
+        try {
+            this.client.sendGoodbye();
         } 
         catch (IOException ex) {
             Logger.getLogger(ClientUI.class.getName()).log(Level.SEVERE, null, ex);
-        } 
-        catch (NoConnectionEstablished e) {
-            JOptionPane.showMessageDialog( this , "No connection established!");
-            jSender.setText("");
-        }
-    }//GEN-LAST:event_jSendActionPerformed
-
-    private void jSenderKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jSenderKeyReleased
-        
-        try {
-            if ( evt.getKeyCode() == KeyEvent.VK_ENTER ) {
-                
-                if ( this.client == null ) {
-                    throw new NoConnectionEstablished();
-                }
-                this.client.sendMessage("Farmer: " + jSender.getText());
-                this.jSender.setText(null);
-            }
-        }
-        catch ( IOException e ) {
-            
-        }
-        catch ( NoConnectionEstablished e ) {
-            JOptionPane.showMessageDialog( this , "No connection established!");
-            jSender.setText("");
         }
         
-    }//GEN-LAST:event_jSenderKeyReleased
+        this.setVisible(false);
+        
+    }//GEN-LAST:event_formWindowClosing
 
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(ClientUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(ClientUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(ClientUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(ClientUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new ClientUI().setVisible(true);
-            }
-        });
-    }
+//    public static void main(String args[]) {
+//        /* Set the Nimbus look and feel */
+//        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+//        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+//         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+//         */
+//        try {
+//            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+//                if ("Nimbus".equals(info.getName())) {
+//                    javax.swing.UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+//                    break;
+//                }
+//            }
+//        } catch (ClassNotFoundException ex) {
+//            java.util.logging.Logger.getLogger(ClientUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (InstantiationException ex) {
+//            java.util.logging.Logger.getLogger(ClientUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (IllegalAccessException ex) {
+//            java.util.logging.Logger.getLogger(ClientUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+//            java.util.logging.Logger.getLogger(ClientUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+//        }
+//        //</editor-fold>
+//
+//        /* Create and display the form */
+//        java.awt.EventQueue.invokeLater(new Runnable() {
+//            public void run() {
+//                new ClientUI(null).setVisible(true);
+//            }
+//        });
+//    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JTextField jAddress;
     private javax.swing.JTextPane jClients;
-    private javax.swing.JButton jConnect;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
+    private javax.swing.JMenuItem jDisconnect;
+    private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem jMenuItem2;
+    private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JTextPane jMessages;
-    private javax.swing.JTextField jNick;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JTextField jPort;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JButton jSend;
-    private javax.swing.JTextArea jSender;
+    private javax.swing.JTextField jSender;
     // End of variables declaration//GEN-END:variables
 
-    Client client;
-    Thread updateMessage;
-    Thread MessageGetter;
+    private Client client;
+    private MessageHandler msgHandler;
+
+    private Thread messageUpdaterThread;
+    private Thread clientThread;
+    private Thread onlineClientsThread;
+
+    private String lastMessage;
 
 }

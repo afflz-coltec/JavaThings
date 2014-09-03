@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package chatserver.business;
 
 import java.io.DataInputStream;
@@ -22,26 +21,28 @@ public class Client implements Runnable {
     private Socket socket;
     private DataInputStream input;
     private DataOutputStream output;
-    
+
     private int ClientID;
     private boolean isConnected = false;
     private String nickName;
-    
+
+    private int wrongChecksumStack = 0;
+
     private static int lastID = 0;
-    
+
     public Client(Socket sock) throws IOException {
         this.socket = sock;
         this.input = new DataInputStream(socket.getInputStream());
         this.output = new DataOutputStream(socket.getOutputStream());
         this.ClientID = ++lastID;
-        
+
         ClientManager.addClient(this);
     }
-    
+
     public Socket getSocket() {
         return this.socket;
     }
-    
+
     public int getClientID() {
         return this.ClientID;
     }
@@ -49,7 +50,7 @@ public class Client implements Runnable {
     public String getNickName() {
         return this.nickName;
     }
-    
+
     public boolean isConnected() {
         return this.isConnected;
     }
@@ -61,65 +62,76 @@ public class Client implements Runnable {
     public void setConnected(boolean isConnected) {
         this.isConnected = isConnected;
     }
-    
+
     public void sendMessage(Message msg) throws IOException {
-        
-        for ( byte b : Message.getMsgAsByteVector(msg) )
+
+        System.out.print("TO " + this.ClientID + ": ");
+
+        for (byte b : Message.getMsgAsByteVector(msg)) {
             this.output.writeByte(b);
-        
+            System.out.print(String.format("%02X ", b));
+        }
+
+        System.out.println();
+
+    }
+
+    private Message receiveMessage() throws IOException {
+
+        byte service;
+        int size;
+        byte[] data;
+        int checksum;
+
+        service = this.input.readByte();
+        size = this.input.readShort();
+
+        data = new byte[size];
+
+        for (int i = 0; i < size; i++) {
+            data[i] = this.input.readByte();
+        }
+
+        return new Message(service, size, data);
+
     }
 
     @Override
     public void run() {
-        
+
         while (true) {
-            
-            byte service = 0;
-            int size = 0;
-            byte[] data = null;
-            int checksum = 0;
-            
-            do {
-                
-                try {
-                    
-                    service = this.input.readByte();
-                    size =    this.input.readShort();
-                    
-                    data =    new byte[size];
-                    
-                    for ( int i=0; i<size; i++ )
-                        data[i] = this.input.readByte();
-                    
-                    checksum = this.input.readShort();
-                    
-                } catch (IOException ex) {
-                    Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+
+            try {
+
+                Message msg = this.receiveMessage();
+
+                int checksum = this.input.readShort();
+
+                if (Message.getCheckSum(msg) == checksum) {
+                    System.out.print("FROM " + this.ClientID + ": ");
+                    Message.printMessage(Message.getMsgAsByteVector(msg));
+                    ClientManager.HandleMessage(msg, checksum, this);
+                } else {
+                    this.wrongChecksumStack++;
                 }
-                
-                Message msg = new Message(service, size, data);
-                
-                if ( Message.getCheckSum(msg) == checksum ) {
-                    ClientManager.MessageHandler(msg, checksum, this);
-                }
-                
-            } while(true);
-            
+
+            } catch (IOException ex) {
+                Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
         }
-        
+
     }
-    
+
     @Override
     protected void finalize() {
+
         try {
             this.input.close();
-        } catch (IOException e) { }
-        try {
             this.output.close();
-        } catch (IOException e) { }
-        try {
             this.socket.close();
-        } catch (IOException e) { }
+        } catch (IOException e) {
+        }
     }
-    
+
 }

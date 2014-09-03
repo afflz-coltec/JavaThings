@@ -8,6 +8,7 @@ package chatserver.business;
 
 import chatserver.business.Message.Services;
 import chatserver.utils.MsgUtils;
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -15,58 +16,6 @@ import java.util.ArrayList;
  * @author pedro
  */
 public class ClientManager implements Runnable {
-    
-    public enum Nack {
-        
-        InvalidChecksum     ((byte)0xFF),
-        NotGreetedClient    ((byte)0xEE),
-        BadFormedMessage    ((byte)0xDD),
-        UnidentifiedClient  ((byte)0xCC),
-        ExistentClient      ((byte)0xBB);
-        
-        private final byte nackByte;
-        
-        private Nack(byte nackByte) {
-            this.nackByte = nackByte;
-        }
-        
-        public byte getByte() {
-            return this.nackByte;
-        }
-        
-        public static Nack getNack(byte b) {
-            
-            Nack n = null;
-            
-            switch(b) {
-                
-                case 0x01:
-                    n = InvalidChecksum;
-                    break;
-                    
-                case 0x02:
-                    n = NotGreetedClient;
-                    break;
-                    
-                case 0x03:
-                    n = BadFormedMessage;
-                    break;
-                    
-                case 0x04:
-                    n = UnidentifiedClient;
-                    break;
-                    
-                case 0x05:
-                    n = ExistentClient;
-                    break;
-                
-            }
-            
-            return n;
-            
-        }
-        
-    }
     
     private static ArrayList<Client> clientList = new ArrayList<>();
     
@@ -78,7 +27,18 @@ public class ClientManager implements Runnable {
         clientList.add(c);
     }
     
-    public static void MessageHandler(Message msg, int checksum, Client c) {
+    private void broadcastMessage(Message msg) throws IOException {
+        
+        for ( Client c : clientList )
+            c.sendMessage(msg);
+        
+    }
+    
+    private void privateMessage(Message msg, int iD) {
+        
+    }
+    
+    public static void HandleMessage(Message msg, int checksum, Client c) throws IOException {
         
         switch(Services.getService(msg.getService())) {
             
@@ -87,7 +47,7 @@ public class ClientManager implements Runnable {
                 if ( !c.isConnected() ) {
                     c.setNickName(MsgUtils.byteVectorToString(msg.getData()));
                     c.setConnected(true);
-//                    c.sendMessage(new Message(Services.HelloService.getByte(), INT_SIZE, ));
+                    c.sendMessage(new Message(Services.HelloService.getByte(), INT_SIZE, MsgUtils.integerToByteVector(c.getClientID())));
                 }
                 
                 break;
