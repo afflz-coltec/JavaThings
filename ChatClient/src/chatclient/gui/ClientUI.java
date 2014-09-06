@@ -8,12 +8,16 @@ package chatclient.gui;
 import chatclient.business.Client;
 import chatclient.business.MessageHandler;
 import chatclient.exceptions.NoConnectionEstablished;
-import com.sun.management.jmx.Trace;
+import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 
 /**
  *
@@ -26,6 +30,11 @@ public class ClientUI extends javax.swing.JFrame {
      */
     public ClientUI(Client c, final MessageHandler msgHandler) {
         initComponents();
+        
+        this.doc = jMessages.getStyledDocument();
+        
+        this.style = new SimpleAttributeSet();
+        
         this.client = c;
         this.msgHandler = msgHandler;
 
@@ -37,18 +46,49 @@ public class ClientUI extends javax.swing.JFrame {
                     synchronized (msgHandler) {
                         try {
                             msgHandler.wait();
-                            jMessages.setText(jMessages.getText() + MessageHandler.getMessage());
+                            
+                            String newString = MessageHandler.getMessage();
+                            
+                            if ( newString.startsWith("[SERVER") ) {
+                                StyleConstants.setForeground(style, Color.WHITE);
+                                StyleConstants.setBackground(style, Color.BLACK);
+                            }
+                            else if ( newString.startsWith("[GLOBAL") ) {
+                                StyleConstants.setForeground(style, Color.BLACK);
+                                StyleConstants.setBackground(style, Color.WHITE);
+                            }
+                            else if ( newString.startsWith("[FROM") || newString.startsWith("[TO") ) {
+                                StyleConstants.setForeground(style, new Color(156,39,214));
+                                StyleConstants.setBackground(style, Color.WHITE);
+                            }
+                            else if ( newString.startsWith("[ERROR") ) {
+                                StyleConstants.setForeground(style, Color.RED);
+                                StyleConstants.setBackground(style, Color.WHITE);
+                            }
+                            else {
+                                StyleConstants.setForeground(style, Color.BLACK);
+                                StyleConstants.setBackground(style, Color.WHITE);
+                            }
+                            
+                            doc.insertString(doc.getLength(), newString,style);
+                            
+                            jMessages.setSelectionStart(jMessages.getText().length());
+                            jMessages.setSelectionEnd(jMessages.getText().length());
+                            
                         } catch (InterruptedException e) {
-
+                            return;
+                        } catch (BadLocationException ex) {
+                            Logger.getLogger(ClientUI.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
                 }
             }
         });
 
+        this.messageUpdaterThread.setName("Message-Updater-Thread");
         this.messageUpdaterThread.start();
       
-        this.onlineClientsThread = new Thread(new Runnable() {
+        this.updateOnlineClients = new Thread(new Runnable() {
 
             @Override
             public void run() {
@@ -56,14 +96,16 @@ public class ClientUI extends javax.swing.JFrame {
                 while(true) {
                     
                     try {
-                        client.requestClientIDs();
+                        client.requestOnlineClients();
+                        jClients.setText(client.getOnlineClientAsString());
                         Thread.sleep(60000);
                     }
                     catch ( InterruptedException e ) {
                         
                     }
                     catch ( IOException e ) {
-                        Logger.getLogger(ClientUI.class.getName()).log(Level.SEVERE, null, e);
+                        JOptionPane.showMessageDialog(null, "Connection to server got down!\nPlease, try logging in again!", "Error", JOptionPane.ERROR_MESSAGE);
+                        System.exit(0);
                     }
                     
                 }
@@ -71,7 +113,8 @@ public class ClientUI extends javax.swing.JFrame {
             }
         });
         
-        this.onlineClientsThread.start();
+        this.updateOnlineClients.setName("Online-Clients-Updater");
+        this.updateOnlineClients.start();
 
     }
 
@@ -94,19 +137,21 @@ public class ClientUI extends javax.swing.JFrame {
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jDisconnect = new javax.swing.JMenuItem();
+        jMenu3 = new javax.swing.JMenu();
+        jChangeNick = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         jMenuItem3 = new javax.swing.JMenuItem();
-        jMenuItem2 = new javax.swing.JMenuItem();
+        jAbout = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Chat Client");
-        setResizable(false);
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 formWindowClosing(evt);
             }
         });
 
+        jMessages.setEditable(false);
         jScrollPane4.setViewportView(jMessages);
 
         jSender.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -115,6 +160,7 @@ public class ClientUI extends javax.swing.JFrame {
             }
         });
 
+        jClients.setEditable(false);
         jScrollPane5.setViewportView(jClients);
 
         jSend.setText("Send");
@@ -131,7 +177,7 @@ public class ClientUI extends javax.swing.JFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 492, Short.MAX_VALUE)
+                    .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 752, Short.MAX_VALUE)
                     .addComponent(jSender))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
@@ -144,7 +190,7 @@ public class ClientUI extends javax.swing.JFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
+                    .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 331, Short.MAX_VALUE)
                     .addComponent(jScrollPane5))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -166,15 +212,38 @@ public class ClientUI extends javax.swing.JFrame {
 
         jMenuBar1.add(jMenu1);
 
+        jMenu3.setText("Options");
+
+        jChangeNick.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_K, java.awt.event.InputEvent.CTRL_MASK));
+        jChangeNick.setText("Change Nick");
+        jChangeNick.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jChangeNickActionPerformed(evt);
+            }
+        });
+        jMenu3.add(jChangeNick);
+
+        jMenuBar1.add(jMenu3);
+
         jMenu2.setText("Help");
 
         jMenuItem3.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F1, 0));
         jMenuItem3.setText("Usage");
+        jMenuItem3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem3ActionPerformed(evt);
+            }
+        });
         jMenu2.add(jMenuItem3);
 
-        jMenuItem2.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_H, java.awt.event.InputEvent.CTRL_MASK));
-        jMenuItem2.setText("About");
-        jMenu2.add(jMenuItem2);
+        jAbout.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_H, java.awt.event.InputEvent.CTRL_MASK));
+        jAbout.setText("About");
+        jAbout.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jAboutActionPerformed(evt);
+            }
+        });
+        jMenu2.add(jAbout);
 
         jMenuBar1.add(jMenu2);
 
@@ -203,20 +272,30 @@ public class ClientUI extends javax.swing.JFrame {
                 if (this.client == null) {
                     throw new NoConnectionEstablished();
                 }
-                this.lastMessage = jSender.getText();
-                jMessages.setText(jMessages.getText() + this.client.DecodeUserMessage(this.lastMessage.trim()));
+                this.lastMessage = jSender.getText().trim();
+                String newMessage = this.client.DecodeUserMessage(this.lastMessage);
+                
+                StyleConstants.setForeground(style, Color.ORANGE);
+                StyleConstants.setBackground(style, Color.WHITE);
+                doc.insertString(doc.getLength(), newMessage,style);
+                
                 this.jSender.setText(null);
                 
             }
-            else if (evt.getKeyCode() == KeyEvent.VK_UP ) {
+            else if (evt.getKeyCode() == KeyEvent.VK_UP) {
                 this.jSender.setText(this.lastMessage);
+            }
+            else {
+                
             }
             
         } catch (IOException e) {
-
+            JOptionPane.showMessageDialog(null, "Connection to server got down!\nPlease, try logging in again!", "Error", JOptionPane.ERROR_MESSAGE);
         } catch (NoConnectionEstablished e) {
             JOptionPane.showMessageDialog(this, "No connection established!");
             jSender.setText("");
+        } catch (BadLocationException ex) {
+            Logger.getLogger(ClientUI.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }//GEN-LAST:event_jSenderKeyReleased
@@ -230,7 +309,7 @@ public class ClientUI extends javax.swing.JFrame {
                 throw new NoConnectionEstablished();
             }
             this.lastMessage = jSender.getText();
-            jMessages.setText(jMessages.getText() + this.client.DecodeUserMessage(this.lastMessage));
+            this.client.DecodeUserMessage(this.lastMessage.trim());
             jSender.setText(null);
             
         } catch (IOException ex) {
@@ -252,7 +331,7 @@ public class ClientUI extends javax.swing.JFrame {
         catch ( IOException ex ) {
             Logger.getLogger(ClientUI.class.getName()).log(Level.SEVERE, null, ex);
         }
-        this.setVisible(false);
+        this.dispose();
         
     }//GEN-LAST:event_jDisconnectActionPerformed
 
@@ -268,6 +347,40 @@ public class ClientUI extends javax.swing.JFrame {
         this.setVisible(false);
         
     }//GEN-LAST:event_formWindowClosing
+
+    private void jAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jAboutActionPerformed
+        // TODO add your handling code here:
+        
+        JOptionPane.showMessageDialog(this, aboutMessage, "About", JOptionPane.INFORMATION_MESSAGE);
+        
+    }//GEN-LAST:event_jAboutActionPerformed
+
+    private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
+        // TODO add your handling code here:
+        
+        String fullHelp = "INTERFACE OPTIONS: \n\n" + Client.INTERFACE_HELP + "\nCOMMAND LINE OPTIONS\n\n" + Client.COMMAND_LINE_HELP;
+        
+        JOptionPane.showMessageDialog(this, fullHelp, "Usage", JOptionPane.INFORMATION_MESSAGE);
+        
+    }//GEN-LAST:event_jMenuItem3ActionPerformed
+
+    private void jChangeNickActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jChangeNickActionPerformed
+        // TODO add your handling code here:
+        
+        String newNick = JOptionPane.showInputDialog(this, "Please, type a new nick:\n", "Change Nickname", JOptionPane.QUESTION_MESSAGE );
+        
+        if ( !newNick.equalsIgnoreCase("") ) {
+            try {
+                this.client.changeNickName(newNick);
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, "Connection to server got down.\nPlease, try logging in again!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+        else {
+            JOptionPane.showMessageDialog(this, "Nick has not been changed!", "Change Nick", JOptionPane.INFORMATION_MESSAGE);
+        }
+        
+    }//GEN-LAST:event_jChangeNickActionPerformed
 
     /**
      * @param args the command line arguments
@@ -305,12 +418,14 @@ public class ClientUI extends javax.swing.JFrame {
 //    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenuItem jAbout;
+    private javax.swing.JMenuItem jChangeNick;
     private javax.swing.JTextPane jClients;
     private javax.swing.JMenuItem jDisconnect;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenu jMenu3;
     private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JTextPane jMessages;
     private javax.swing.JPanel jPanel2;
@@ -325,8 +440,13 @@ public class ClientUI extends javax.swing.JFrame {
 
     private Thread messageUpdaterThread;
     private Thread clientThread;
-    private Thread onlineClientsThread;
+    private Thread updateOnlineClients;
 
     private String lastMessage;
+    
+    private StyledDocument doc;
+    private SimpleAttributeSet style;
+    
+    private static final String aboutMessage = "Chat Client v2.0\nMade by: Pedro Otavio.";
 
 }

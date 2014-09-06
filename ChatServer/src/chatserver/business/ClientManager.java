@@ -58,7 +58,7 @@ public class ClientManager implements Runnable {
             case ConnectedClientsService:
                 break;
                 
-            case GetNickService:
+            case RequestNickService:
                 break;
                 
             case SendMsgService:

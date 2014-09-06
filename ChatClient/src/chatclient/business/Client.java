@@ -12,6 +12,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -57,11 +59,14 @@ public class Client implements Runnable {
 
     };
 
-    private static final String HELP_MESSAGE = "[/option] [parameters] [Message]\n"
-            + "\nwhere options include:\n"
-            + "\t/h\tShow this help message\n"
-            + "\t/c\tSend requisition to change your nickname\n"
-            + "\t/w\tSend private message to specified ID available in the client list\n";
+    public static final String INTERFACE_HELP = "To change the nick name go to Option->Change Nick.\n";
+    public static final String COMMAND_LINE_HELP =  "\n----------------------------------Usage---------------------------------\n" + 
+                                                    "\t[[/option] [parameters]] [Message]\n" + 
+                                                    "\n\twhere options include:\n" + 
+                                                    "\t/h\tShow this help message\n" + 
+                                                    "\t/c\tSend requisition to change your nickname\n" + 
+                                                    "\t/w\tSend private message to specified ID available in the client list\n" +
+                                                    "------------------------------------------------------------------------\n\n";
 
     private static final String REQUEST_SENT = "REQUEST SENT TO SERVER!\n";
 
@@ -70,12 +75,15 @@ public class Client implements Runnable {
     private DataOutputStream output;
 
     private int ClientID;
+    private String nick;
+    private String tmpNick;
     private boolean isIDSetted = false;
+    private int invalidChecksumStack = 0;
     
     private static ArrayList<String> msgList = new ArrayList<>();
     
-    private static ArrayList<Integer> idList = new ArrayList<>();
-    private static ArrayList<String> nickList = new ArrayList<>();
+    static ArrayList<OnlineClient> onlineClientsList = new ArrayList<>();
+    String lastOnlineNick = "";
 
     private static final int BYTES_PER_CHAR = 2;
     private static final int INT_SIZE = 4;
@@ -84,12 +92,15 @@ public class Client implements Runnable {
 
     private static final int GLOBAL_ID = 0;
     private static final int USER_ID = 0;
+    
+    final Object staff = new Object();
 
     public Client(String ip, int port, String nick) throws IOException {
 
         this.socket = new Socket(ip, port);
         this.input = new DataInputStream(socket.getInputStream());
         this.output = new DataOutputStream(socket.getOutputStream());
+        this.tmpNick = nick;
         
         MessageHandler msgHandler = new MessageHandler(this);
 
@@ -101,7 +112,15 @@ public class Client implements Runnable {
 
     }
     
-    public int getClientID() {
+    public String getNick() {
+        return this.nick;
+    }
+    
+    public void setNick() {
+        this.nick = tmpNick;
+    }
+    
+    int getClientID() {
         return this.ClientID;
     }
 
@@ -116,6 +135,22 @@ public class Client implements Runnable {
     public void setClientIDSetted() {
         this.isIDSetted = true;
     }
+    
+    void invalidChecksumStack() {
+        this.invalidChecksumStack++;
+    }
+    
+    public String getOnlineClientAsString() {
+        
+        String clients = "";
+        
+        for ( OnlineClient oc : onlineClientsList ) {
+            clients += oc.getClientID() + " ➤ " + oc.getNick() + "\n";
+        }
+        
+        return clients;
+        
+    }
 
     private void sendMuchBytes(byte[] msg) throws IOException {
 
@@ -127,7 +162,7 @@ public class Client implements Runnable {
 
     }
 
-    private void getConnected(String nick) throws IOException {
+    public void getConnected(String nick) throws IOException {
 
         byte[] msg = Message.getMsgAsByteVector(new Message(Services.HelloService.getByte(), nick.length() * BYTES_PER_CHAR, MsgUtils.stringToByteVector(nick)));
 
@@ -135,7 +170,7 @@ public class Client implements Runnable {
 
     }
 
-    private void changeNickName(String newNick) throws IOException {
+    public void changeNickName(String newNick) throws IOException {
 
         byte[] msg = Message.getMsgAsByteVector(new Message(Services.ChangeNickService.getByte(), newNick.length() * BYTES_PER_CHAR, MsgUtils.stringToByteVector(newNick)));
 
@@ -143,9 +178,39 @@ public class Client implements Runnable {
 
     }
     
-    public void requestClientIDs() throws IOException {
+    public void requestOnlineClients() throws IOException {
         
         byte[] msg = Message.getMsgAsByteVector(new Message(Services.ConnectedClientsService.getByte(), 0, new byte[]{}));
+        
+        sendMuchBytes(msg);
+        
+        synchronized(staff) {
+            try {
+                staff.wait();
+            } 
+            catch (InterruptedException ex) {
+                Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        
+        for ( OnlineClient oc : onlineClientsList ) {
+            this.requestNick(oc.getClientID());
+            synchronized(staff) {
+                try {
+                    staff.wait();
+                } 
+                catch (InterruptedException ex) {
+                    Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            oc.setNick(lastOnlineNick);
+        }
+        
+    }
+    
+    private void requestNick(int iD) throws IOException {
+        
+        byte[] msg = Message.getMsgAsByteVector(new Message(Services.RequestNickService.getByte(), INT_SIZE, MsgUtils.integerToByteVector(iD)));
         
         sendMuchBytes(msg);
         
@@ -168,8 +233,6 @@ public class Client implements Runnable {
     }
     
     public void sendGoodbye() throws IOException {
-        
-        System.out.println("Sending request to exit!");
         
         byte[] byteMsg = Message.getMsgAsByteVector(new Message(Services.ByeService.getByte(),0,new byte[]{}));
         
@@ -203,12 +266,12 @@ public class Client implements Runnable {
 
         if (msg.startsWith("/")) {
 
-            String[] splittedMsg = msg.split(" ");
+            String[] splittedMsg = msg.split(" ",3);
 
             switch (UserOptions.getOption(splittedMsg[0])) {
 
                 case HelpOption:
-                    feedBack = HELP_MESSAGE;
+                    feedBack = COMMAND_LINE_HELP;
                     break;
 
                 case ChangeNickOption:
@@ -216,11 +279,20 @@ public class Client implements Runnable {
                     break;
 
                 case PrivateMessageOption:
-                    this.sendMessage(splittedMsg[2], USER_ID, Integer.parseInt(splittedMsg[1]));
+                    
+                    int destinyID = this.ClientID;
+                    
+                    for ( OnlineClient oc : onlineClientsList ) {
+                        if ( oc.getNick().equals(splittedMsg[1]) ) {
+                            destinyID = oc.getClientID();
+                        }
+                    }
+                    
+                    this.sendMessage(splittedMsg[2], USER_ID, destinyID);
                     break;
 
                 case InvalidOption:
-                    feedBack = HELP_MESSAGE;
+                    feedBack = COMMAND_LINE_HELP;
                     break;
 
             }
@@ -249,7 +321,7 @@ public class Client implements Runnable {
                 }
 
             } catch (IOException e) {
-
+                return;
             }
 
         }

@@ -17,7 +17,7 @@ public class Message {
         HelloService            ((byte)0x01),
         ChangeNickService       ((byte)0x02),
         ConnectedClientsService ((byte)0x03),
-        GetNickService          ((byte)0x04),
+        RequestNickService      ((byte)0x04),
         SendMsgService          ((byte)0x05),
         ByeService              ((byte)0x0A),
         DeniedService           ((byte)0x7F);
@@ -50,7 +50,7 @@ public class Message {
                     break;
                     
                 case 0x04:
-                    s = GetNickService;
+                    s = RequestNickService;
                     break;
                     
                 case 0x05:

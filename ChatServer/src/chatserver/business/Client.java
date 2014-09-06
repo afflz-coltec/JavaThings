@@ -110,13 +110,19 @@ public class Client implements Runnable {
                 if (Message.getCheckSum(msg) == checksum) {
                     System.out.print("FROM " + this.ClientID + ": ");
                     Message.printMessage(Message.getMsgAsByteVector(msg));
-                    ClientManager.HandleMessage(msg, checksum, this);
+                    MessageHandler.addNewRequest(new Request(this, msg));
                 } else {
                     this.wrongChecksumStack++;
                 }
+                
+                if ( this.wrongChecksumStack == 3 ) {
+                    setConnected(false);
+                    return;
+                }
 
             } catch (IOException ex) {
-                Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+                this.setConnected(false);
+                return;
             }
 
         }

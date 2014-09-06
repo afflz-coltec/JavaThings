@@ -8,7 +8,10 @@ package chatclient.gui;
 import chatclient.business.Client;
 import chatclient.business.MessageHandler;
 import chatclient.exceptions.EmptyFieldException;
+import chatclient.exceptions.InvalidNickName;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
@@ -20,7 +23,7 @@ public class LogInUI extends javax.swing.JFrame {
 
     private Client client;
     private Thread clientThread;
-    
+
     private MessageHandler msgHandler;
     private Thread msgHandlerThread;
 
@@ -56,7 +59,7 @@ public class LogInUI extends javax.swing.JFrame {
 
         jLabel1.setText("Server IP:");
 
-        jServerIP.setText("10.0.0.20");
+        jServerIP.setText("0.0.0.0");
 
         jLabel2.setText("Server Port:");
 
@@ -137,18 +140,43 @@ public class LogInUI extends javax.swing.JFrame {
                 throw new EmptyFieldException();
             }
 
-            this.client = new Client(jServerIP.getText(), Integer.parseInt(jServerPort.getText()), jNickName.getText());
-            this.clientThread = new Thread(this.client);
-            
-            this.msgHandler = new MessageHandler(this.client);
-            this.msgHandlerThread = new Thread(this.msgHandler);
-            
-            this.clientThread.start();
-            this.msgHandlerThread.start();
+            if (this.client == null) {
+                this.client = new Client(jServerIP.getText(), Integer.parseInt(jServerPort.getText()), jNickName.getText());
+                this.clientThread = new Thread(this.client);
+                this.clientThread.setName("Client-Thread");
+                this.clientThread.start();
+            }
+            else {
+                this.client.getConnected(this.jNickName.getText());
+            }
 
-            new ClientUI(this.client,this.msgHandler).setVisible(true); // if it gets here, everything's fine
+            if (this.msgHandler == null) {
+                this.msgHandler = new MessageHandler(this.client);
+                this.msgHandlerThread = new Thread(this.msgHandler);
+                this.msgHandlerThread.setName("Message-Handler-Thread");
+                this.msgHandlerThread.start();
+            }
 
-            this.dispose();
+            synchronized (msgHandler) {
+
+                try {
+
+                    msgHandler.wait();
+
+                    if (!client.isIDSetted())
+                        throw new InvalidNickName();
+                    
+                    new ClientUI(this.client, this.msgHandler).setVisible(true);
+                    this.dispose();
+
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(LogInUI.class.getName()).log(Level.SEVERE, null, ex);
+
+                } catch (InvalidNickName e) {
+                    JOptionPane.showMessageDialog(this, "Invalid nickname! Someone is already using it!\nPlease, try another one.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+
+            }
 
         } catch (EmptyFieldException e) {
             JOptionPane.showMessageDialog(this, "Fill all the blanks!", "Error", JOptionPane.ERROR_MESSAGE);
@@ -192,7 +220,7 @@ public class LogInUI extends javax.swing.JFrame {
             }
         });
     }
-    
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jConnect;
     private javax.swing.JLabel jLabel1;

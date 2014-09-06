@@ -18,11 +18,12 @@ import java.util.logging.Logger;
  */
 public class ChatServer {
     
-    private static final String HELP_MESSAGE = "Usage: java -jar Chat_Server.java [-options] [port]\n"
-            + "\nwhere options include:\n"
-            + "\t-p --port\tSets the port to run the chat server\n"
-            + "\t-h --help -?\tPrint this help message"
-            + "\n";
+    private static final String HELP_MESSAGE =  "\n-------------------------------------------------------------" + 
+                                                "\nUsage: java -jar Chat_Server.java [[-options] [port]]\n" + 
+                                                "\nwhere options include:\n" + 
+                                                "\t-p --port\tSets the port to run the chat server\n" + 
+                                                "\t-h --help -?\tPrint this help message\n" + 
+                                                "-------------------------------------------------------------\n";
 
     /**
      * @param args the command line arguments
