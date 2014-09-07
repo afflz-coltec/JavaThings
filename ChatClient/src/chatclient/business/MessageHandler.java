@@ -166,6 +166,8 @@ public class MessageHandler implements Runnable {
         int iD;
         int numberOfIDs = size / 4;
         byte[] idByte = new byte[INT_SIZE];
+        
+        Client.onlineClientsList.clear();
 
         for (int i = 0; i < numberOfIDs; i++) {
             for (int j = 0; j < INT_SIZE; j++) {
