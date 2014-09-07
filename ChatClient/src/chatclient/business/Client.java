@@ -218,8 +218,6 @@ public class Client implements Runnable {
 
     private void sendMessage(String msg, int FROM, int TO) throws IOException {
 
-        System.out.print("MESSAGE: " + msg);
-
         byte[] data = new byte[FROM_TO_ID_SIZE + msg.length() * BYTES_PER_CHAR];
 
         System.arraycopy(MsgUtils.integerToByteVector(FROM), 0, data, 0, 4);
