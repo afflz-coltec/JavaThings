@@ -12,6 +12,9 @@ package chatserver.business;
  */
 public class Message {
     
+    /**
+     * Enumeration of the Services.
+     */
     public enum Services {
         
         HelloService            ((byte)0x01),
@@ -20,7 +23,8 @@ public class Message {
         RequestNickService      ((byte)0x04),
         SendMsgService          ((byte)0x05),
         ByeService              ((byte)0x0A),
-        DeniedService           ((byte)0x7F);
+        DeniedService           ((byte)0x7F),
+        Invalid                 ((byte)0xFF);
         
         private final byte serviceByte;
         
@@ -28,10 +32,19 @@ public class Message {
             this.serviceByte = serviceByte;
         }
         
+        /**
+         * Gets the service byte.
+         * @return The service <code>byte</code>.
+         */
         public byte getByte() {
             return this.serviceByte;
         }
         
+        /**
+         * Get Service by byte.
+         * @param b Service byte.
+         * @return Returns a <code>Services</code> element.
+         */
         public static Services getService(byte b) {
             
             Services s = null;
@@ -64,6 +77,10 @@ public class Message {
                 case 0x7F:
                     s = DeniedService;
                     break;
+                    
+                default:
+                    s = Invalid;
+                    break;
             }
             
             return s;
@@ -76,27 +93,49 @@ public class Message {
     private int size;
     private byte[] data;
     
-    private static final int PAYLOAD = 5;
+    public static final int PAYLOAD = 5;
     private static final int BYTES_PER_CHAR = 2;
     
+    /**
+     * This class implements a Message object that contains a service, the size and the data of the message.
+     * @param service A <code>byte</code> of the service.
+     * @param size A <code>int</code> size of the data.
+     * @param data The <code>byte[]</code> containing the data.
+     */
     public Message(byte service, int size, byte[] data) {
         this.service = service;
         this.size = size;
         this.data = data;
     }
 
+    /**
+     * Gets the service of the message.
+     * @return Returns the service <code>byte</code>.
+     */
     public byte getService() {
         return this.service;
     }
     
+    /**
+     * Gets the size of message data.
+     * @return A <code>int</code> containing the size.
+     */
     public int getSize() {
         return this.size;
     }
     
+    /**
+     * Gets the data of the message.
+     * @return A <code>byte[]</code> containing the data.
+     */
     public byte[] getData() {
         return this.data;
     }
     
+    /**
+     * Prints the message in the console.
+     * @param msg A <code>byte[]</code> containing the message.
+     */
     public static void printMessage(byte[] msg) {
         
         for ( byte b : msg )
@@ -106,6 +145,11 @@ public class Message {
         
     }
     
+    /**
+     * Calculates the checksum of a message.
+     * @param msg A <code>Message</code> to be calculated.
+     * @return An <code>int</code> checksum.
+     */
     public static int getCheckSum(Message msg) {
         
         int checksum = (int)msg.service & 0xFF;

@@ -9,6 +9,7 @@ package chatserver;
 import chatserver.business.Server;
 import chatserver.exceptions.InvalidPort;
 import java.io.IOException;
+import java.net.BindException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,6 +27,7 @@ public class ChatServer {
                                                 "-------------------------------------------------------------\n";
 
     /**
+     * Starts the server, with the default port or with the port the user sets.
      * @param args the command line arguments
      */
     public static void main(String[] args) {
@@ -33,7 +35,7 @@ public class ChatServer {
         
         int port;
 
-        if (args.length > 2 || args.length == 1) {
+        if (args.length > 2 || args.length == 1) { // If theres more than 2 or just 1 argument, just prints the help message.
             
             System.out.println(ChatServer.HELP_MESSAGE);
             System.exit(0);
@@ -50,6 +52,7 @@ public class ChatServer {
 
             } else {
 
+                // switch the options chosen by the user.
                 switch (args[0]) {
 
                     case "-h":
@@ -66,8 +69,7 @@ public class ChatServer {
                         if (port <= 1023 || port > 65535) {
                             throw new InvalidPort();
                         }
-
-                        // TODO: Create and start server.
+                        
                         Server server = new Server(port);
                         
                         server.startServer();
@@ -87,8 +89,9 @@ public class ChatServer {
             System.out.println("Port number must be between 1024 and 65535!");
             
         } catch (IOException ex) {
-            Logger.getLogger(ChatServer.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.println("Address already in use!");
         }
+        
     }
     
 }
