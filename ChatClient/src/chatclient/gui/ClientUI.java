@@ -7,7 +7,6 @@ package chatclient.gui;
 
 import chatclient.business.Client;
 import chatclient.business.MessageHandler;
-import chatclient.exceptions.NoConnectionEstablished;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
@@ -30,14 +29,15 @@ public class ClientUI extends javax.swing.JFrame {
      */
     public ClientUI(Client c, final MessageHandler msgHandler) {
         initComponents();
-        
+
+        // Things to change text color.
         this.doc = jMessages.getStyledDocument();
-        
         this.style = new SimpleAttributeSet();
-        
+
         this.client = c;
         this.msgHandler = msgHandler;
 
+        // Declared a new Anonimous Runnable to update the messages in the box.
         this.messageUpdaterThread = new Thread(new Runnable() {
 
             @Override
@@ -46,35 +46,31 @@ public class ClientUI extends javax.swing.JFrame {
                     synchronized (msgHandler) {
                         try {
                             msgHandler.wait();
-                            
+
                             String newString = MessageHandler.getMessage();
-                            
-                            if ( newString.startsWith("[SERVER") ) {
+
+                            if (newString.startsWith("[SERVER")) {
                                 StyleConstants.setForeground(style, Color.WHITE);
                                 StyleConstants.setBackground(style, Color.BLACK);
-                            }
-                            else if ( newString.startsWith("[GLOBAL") ) {
+                            } else if (newString.startsWith("[GLOBAL")) {
                                 StyleConstants.setForeground(style, Color.BLACK);
                                 StyleConstants.setBackground(style, Color.WHITE);
-                            }
-                            else if ( newString.startsWith("[FROM") || newString.startsWith("[TO") ) {
-                                StyleConstants.setForeground(style, new Color(156,39,214));
+                            } else if (newString.startsWith("[FROM") || newString.startsWith("[TO")) {
+                                StyleConstants.setForeground(style, new Color(156, 39, 214));
                                 StyleConstants.setBackground(style, Color.WHITE);
-                            }
-                            else if ( newString.startsWith("[ERROR") ) {
+                            } else if (newString.startsWith("[ERROR")) {
                                 StyleConstants.setForeground(style, Color.RED);
                                 StyleConstants.setBackground(style, Color.WHITE);
-                            }
-                            else {
+                            } else {
                                 StyleConstants.setForeground(style, Color.BLACK);
                                 StyleConstants.setBackground(style, Color.WHITE);
                             }
-                            
-                            doc.insertString(doc.getLength(), newString,style);
-                            
+
+                            doc.insertString(doc.getLength(), newString, style);
+
                             jMessages.setSelectionStart(jMessages.getText().length());
                             jMessages.setSelectionEnd(jMessages.getText().length());
-                            
+
                         } catch (InterruptedException e) {
                             return;
                         } catch (BadLocationException ex) {
@@ -85,34 +81,33 @@ public class ClientUI extends javax.swing.JFrame {
             }
         });
 
-        this.messageUpdaterThread.setName("Message-Updater-Thread");
-        this.messageUpdaterThread.start();
-      
+        // Another new Anonimous Runnable to update the client list in the other box.
         this.updateOnlineClients = new Thread(new Runnable() {
 
             @Override
             public void run() {
-                
-                while(true) {
-                    
+
+                while (true) {
+
                     try {
                         client.requestOnlineClients();
                         jClients.setText(client.getOnlineClientAsString());
-                        Thread.sleep(10000);
-                    }
-                    catch ( InterruptedException e ) {
-                        
-                    }
-                    catch ( IOException e ) {
+                        Thread.sleep(60000);
+                    } catch (InterruptedException e) {
+
+                    } catch (IOException e) {
                         JOptionPane.showMessageDialog(null, "Connection to server got down!\nPlease, try logging in again!", "Error", JOptionPane.ERROR_MESSAGE);
                         System.exit(0);
                     }
-                    
+
                 }
-                
+
             }
         });
-        
+
+        // Start the threads...
+        this.messageUpdaterThread.setName("Message-Updater-Thread");
+        this.messageUpdaterThread.start();
         this.updateOnlineClients.setName("Online-Clients-Updater");
         this.updateOnlineClients.start();
 
@@ -263,123 +258,149 @@ public class ClientUI extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    /**
+     * On key released, this method is called to define what is going to happen.
+     *
+     * @param evt
+     */
     private void jSenderKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jSenderKeyReleased
         // TODO add your handling code here:
         try {
-            
-            if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
 
-                if (this.client == null) {
-                    throw new NoConnectionEstablished();
+            if ( !jSender.getText().startsWith("\n") ) {
+                if (evt.getKeyCode() == KeyEvent.VK_ENTER) { // If the release key is enter, just call the DecodeUserMessage method...
+
+                    this.lastMessage = jSender.getText().trim();
+                    String newMessage = this.client.DecodeUserMessage(this.lastMessage);
+
+                    if ( newMessage.startsWith("[ERROR") ) {
+                        StyleConstants.setForeground(style, Color.RED);
+                        StyleConstants.setBackground(style, Color.WHITE);
+                    }
+                    else {
+                        StyleConstants.setForeground(style, Color.ORANGE);
+                        StyleConstants.setBackground(style, Color.WHITE);
+                    }
+                    doc.insertString(doc.getLength(), newMessage, style);
+
+                    this.jSender.setText(null);
+
+                } // if the key is the up arrow, puts on the field the last thing sent.
+                else if (evt.getKeyCode() == KeyEvent.VK_UP) {
+                    this.jSender.setText(this.lastMessage);
+                } else { // just nothing...
+
                 }
-                this.lastMessage = jSender.getText().trim();
-                String newMessage = this.client.DecodeUserMessage(this.lastMessage);
-                
-                StyleConstants.setForeground(style, Color.ORANGE);
-                StyleConstants.setBackground(style, Color.WHITE);
-                doc.insertString(doc.getLength(), newMessage,style);
-                
-                this.jSender.setText(null);
-                
-            }
-            else if (evt.getKeyCode() == KeyEvent.VK_UP) {
-                this.jSender.setText(this.lastMessage);
             }
             else {
                 
             }
-            
+
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, "Connection to server got down!\nPlease, try logging in again!", "Error", JOptionPane.ERROR_MESSAGE);
-        } catch (NoConnectionEstablished e) {
-            JOptionPane.showMessageDialog(this, "No connection established!");
-            jSender.setText("");
         } catch (BadLocationException ex) {
             Logger.getLogger(ClientUI.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }//GEN-LAST:event_jSenderKeyReleased
 
+    /**
+     * On click, this method is called to send the message.
+     *
+     * @param evt
+     */
     private void jSendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jSendActionPerformed
         // TODO add your handling code here:
 
         try {
 
-            if (this.client == null) {
-                throw new NoConnectionEstablished();
-            }
-            this.lastMessage = jSender.getText();
-            this.client.DecodeUserMessage(this.lastMessage.trim());
+            this.lastMessage = jSender.getText().trim();
+            this.client.DecodeUserMessage(this.lastMessage);
             jSender.setText(null);
-            
+
         } catch (IOException ex) {
-            Logger.getLogger(ClientUI.class.getName()).log(Level.SEVERE, null, ex);
-            
-        } catch (NoConnectionEstablished e) {
-            JOptionPane.showMessageDialog(this, "No connection established!");
-            jSender.setText("");
+            JOptionPane.showMessageDialog(null, "Connection to server got down!\nPlease, try logging in again!", "Error", JOptionPane.ERROR_MESSAGE);
+
         }
 
     }//GEN-LAST:event_jSendActionPerformed
 
     private void jDisconnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jDisconnectActionPerformed
         // TODO add your handling code here:
-        
+
         try {
             this.client.sendGoodbye();
-        }
-        catch ( IOException ex ) {
-            Logger.getLogger(ClientUI.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(null, "Connection to server got down!\nPlease, try logging in again!", "Error", JOptionPane.ERROR_MESSAGE);
         }
         this.dispose();
-        
+
     }//GEN-LAST:event_jDisconnectActionPerformed
 
+    /**
+     * On window closing, send the bye service to get disconnected.
+     *
+     * @param evt
+     */
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
-        
+
         try {
             this.client.sendGoodbye();
-        } 
-        catch (IOException ex) {
-            Logger.getLogger(ClientUI.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            System.exit(1);
         }
-        
+
         this.setVisible(false);
-        
+
     }//GEN-LAST:event_formWindowClosing
 
+    /**
+     * Shows the About of the chat.
+     *
+     * @param evt
+     */
     private void jAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jAboutActionPerformed
         // TODO add your handling code here:
-        
+
         JOptionPane.showMessageDialog(this, aboutMessage, "About", JOptionPane.INFORMATION_MESSAGE);
-        
+
     }//GEN-LAST:event_jAboutActionPerformed
 
+    /**
+     * Shows the help message.
+     *
+     * @param evt
+     */
     private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
         // TODO add your handling code here:
-        
+
         String fullHelp = "INTERFACE OPTIONS: \n\n" + Client.INTERFACE_HELP + "\nCOMMAND LINE OPTIONS\n\n" + Client.COMMAND_LINE_HELP;
-        
+
         JOptionPane.showMessageDialog(this, fullHelp, "Usage", JOptionPane.INFORMATION_MESSAGE);
-        
+
     }//GEN-LAST:event_jMenuItem3ActionPerformed
 
+    /**
+     * Option in the menu to request the server to change the nickname on the
+     * chat.
+     *
+     * @param evt
+     */
     private void jChangeNickActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jChangeNickActionPerformed
         // TODO add your handling code here:
-        
-        String newNick = JOptionPane.showInputDialog(this, "Please, type a new nick:\n", "Change Nickname", JOptionPane.QUESTION_MESSAGE );
-        
-        if ( !newNick.equalsIgnoreCase("") ) {
+
+        String newNick = JOptionPane.showInputDialog(this, "Please, type a new nick:\n", "Change Nickname", JOptionPane.QUESTION_MESSAGE);
+
+        if (!newNick.equalsIgnoreCase("")) {
             try {
                 this.client.changeNickName(newNick);
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(this, "Connection to server got down.\nPlease, try logging in again!", "Error", JOptionPane.ERROR_MESSAGE);
             }
-        }
-        else {
+        } else {
             JOptionPane.showMessageDialog(this, "Nick has not been changed!", "Change Nick", JOptionPane.INFORMATION_MESSAGE);
         }
-        
+
     }//GEN-LAST:event_jChangeNickActionPerformed
 
     /**
@@ -443,10 +464,10 @@ public class ClientUI extends javax.swing.JFrame {
     private Thread updateOnlineClients;
 
     private String lastMessage;
-    
+
     private StyledDocument doc;
     private SimpleAttributeSet style;
-    
+
     private static final String aboutMessage = "Chat Client v2.0\nMade by: Pedro Otavio.";
 
 }

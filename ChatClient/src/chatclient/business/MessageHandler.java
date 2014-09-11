@@ -6,12 +6,9 @@
 package chatclient.business;
 
 import chatclient.business.Message.Services;
-import chatclient.exceptions.InvalidNickName;
 import chatclient.utils.MsgUtils;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -19,6 +16,9 @@ import java.util.logging.Logger;
  */
 public class MessageHandler implements Runnable {
 
+    /**
+     * Enumeration of the Nacks.
+     */
     public enum Nack {
 
         InvalidChecksum     ((byte) 0xFF),
@@ -35,10 +35,19 @@ public class MessageHandler implements Runnable {
             this.nackByte = nackByte;
         }
 
+        /**
+         * Gets the byte of a nack.
+         * @return Nack's <code>byte</code>.
+         */
         public byte getByte() {
             return this.nackByte;
         }
 
+        /**
+         * Gets a Nack by byte.
+         * @param b The nack <code>byte</code>.
+         * @return A <code>Nack</code> element.
+         */
         public static Nack getNack(byte b) {
 
             Nack n = null;
@@ -87,10 +96,19 @@ public class MessageHandler implements Runnable {
 
     private static final int INT_SIZE = 4;
 
+    /**
+     * This class implements a Message Handler to a client.
+     * @param c The <code>Client</code> to associate the Message Handler.
+     */
     public MessageHandler(Client c) {
         client = c;
     }
 
+    /**
+     * Generic method to define which handler is going to be used.
+     * @param msg A <code>Message</code> to be handled.
+     * @throws IOException 
+     */
     private static void HandleMessage(Message msg) throws IOException {
 
         switch (Services.getService(msg.getService())) {
@@ -126,16 +144,21 @@ public class MessageHandler implements Runnable {
         }
     }
 
+    /**
+     * A Handler to the service <code>HelloService</code>.
+     * @param data The data of the <code>Message</code>.
+     * @throws IOException 
+     */
     private static void Handle0x01(byte[] data) throws IOException {
 
         String newMessage;
 
-        if (!client.isIDSetted()) {
+        if (!client.isIDSetted()) { // If the client's ID isn't setted, sets its ID and its nickname.
             client.setClientID(MsgUtils.byteVectorToInteger(data));
             client.setNick();
             client.setClientIDSetted();
             newMessage = "[SERVER]: Welcome to the chat " + client.getNick() + "!\n";
-        } else {
+        } else { // If not, just append one message warning that someone else connected to the chat.
             newMessage = "[SERVER]: Client " + String.valueOf(MsgUtils.byteVectorToInteger(data)) + " joined the chat!\n";
         }
 
@@ -143,6 +166,11 @@ public class MessageHandler implements Runnable {
 
     }
 
+    /**
+     * A Handler to the service <code>ChangeNickService</code>.
+     * @param size Size of the nickname.
+     * @param data The <code>byte[]</code> containing the nickname.
+     */
     private static void Handle0x02(int size, byte[] data) {
 
         int nickSize = size - INT_SIZE;
@@ -161,6 +189,11 @@ public class MessageHandler implements Runnable {
 
     }
 
+    /**
+     * A Handler to the service <code>ConnectedClientsService</code>.
+     * @param size The size of the data.
+     * @param data The data containing the list of the id of the connected clients.
+     */
     private static void Handle0x03(int size, byte[] data) {
 
         int iD;
@@ -183,6 +216,10 @@ public class MessageHandler implements Runnable {
 
     }
 
+    /**
+     * A Handler to the service <code>RequestNickService</code>.
+     * @param data The <code>byte[]</code> data containing the nickname.
+     */
     private static void Handle0x04(byte[] data) {
 
         client.lastOnlineNick = MsgUtils.byteVectorToString(data);
@@ -193,6 +230,11 @@ public class MessageHandler implements Runnable {
 
     }
 
+    /**
+     * A Handler to the service <code>SendMsgService</code>.
+     * @param size The <code>int</code> size of the message.
+     * @param data The <code>byte[]</code> data containing the message.
+     */
     private static void Handle0x05(int size, byte[] data) {
 
         String msg = "";
@@ -258,6 +300,10 @@ public class MessageHandler implements Runnable {
 
     }
 
+    /**
+     * A Handler to the service <code>ByeService</code>.
+     * @param data The <code>byte[]</code> data containing the ID of the client who disconnected.
+     */
     private static void Handle0x0A(byte[] data) {
 
         int receivedId = MsgUtils.byteVectorToInteger(data);
@@ -270,6 +316,10 @@ public class MessageHandler implements Runnable {
 
     }
 
+    /**
+     * A Handler to the service <code>DeniedService</code>.
+     * @param data The <code>byte[]</code> data containing the denied service.
+     */
     private static void Handle0x7F(byte[] data) {
         
         String serverMessage = "";
@@ -286,14 +336,15 @@ public class MessageHandler implements Runnable {
                 break;
 
             case BadFormedMessage:
+                serverMessage = "[ERROR]: Something went wrong! Try sending again!\n";
                 break;
 
             case UnidentifiedClient:
-                serverMessage = "[ERROR]: Unidentified client!\n";
+                serverMessage = "[ERROR]: This client is not online!\n";
                 break;
 
             case ExistentClient:
-                serverMessage = "[ERROR]: \n";
+                serverMessage = "[ERROR]: This message should never appear!\n";
                 break;
                 
             case NotAvailableNick:
@@ -309,14 +360,18 @@ public class MessageHandler implements Runnable {
 
     }
 
-    public static final void addString(String s) {
-        MessageHandler.stringList.add(s);
-    }
-
+    /**
+     * Adds a new <code>Message</code> to the buffer.
+     * @param msg <code>Message</code> to be added.
+     */
     public static final void addMessage(Message msg) {
         MessageHandler.msgList.add(msg);
     }
 
+    /**
+     * Gets a new message to print on screen.
+     * @return A <code>String</code> if the buffer have something or nothing if not.
+     */
     public static String getMessage() {
         return stringList.size() > 0 ? stringList.remove(0) : "";
     }

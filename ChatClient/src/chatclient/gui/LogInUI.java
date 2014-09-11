@@ -9,6 +9,7 @@ import chatclient.business.Client;
 import chatclient.business.MessageHandler;
 import chatclient.exceptions.EmptyFieldException;
 import chatclient.exceptions.InvalidNickName;
+import chatclient.exceptions.NickWithSpacesException;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -136,10 +137,15 @@ public class LogInUI extends javax.swing.JFrame {
 
         try {
 
+            // If some fields don't have nothing, throw the exception.
             if (jServerIP.getText().equalsIgnoreCase("") || jServerPort.getText().equalsIgnoreCase("") || jNickName.getText().equalsIgnoreCase("")) {
                 throw new EmptyFieldException();
             }
+            else if ( jNickName.getText().contains(" ") ){
+                throw new NickWithSpacesException();
+            }
 
+            // Does a simple single ton to a client.
             if (this.client == null) {
                 this.client = new Client(jServerIP.getText(), Integer.parseInt(jServerPort.getText()), jNickName.getText());
                 this.clientThread = new Thread(this.client);
@@ -150,6 +156,7 @@ public class LogInUI extends javax.swing.JFrame {
                 this.client.getConnected(this.jNickName.getText());
             }
 
+            // Also a simple single ton, but now for the Message Handler.
             if (this.msgHandler == null) {
                 this.msgHandler = new MessageHandler(this.client);
                 this.msgHandlerThread = new Thread(this.msgHandler);
@@ -161,11 +168,12 @@ public class LogInUI extends javax.swing.JFrame {
 
                 try {
 
-                    msgHandler.wait();
+                    msgHandler.wait(); // Waits for the server answer...
 
-                    if (!client.isIDSetted())
+                    if (!client.isIDSetted()) // If the client is not connected, throws the InvalidNickName exception.
                         throw new InvalidNickName();
                     
+                    // If it gets here, creates a chat window and dispose the login window.
                     new ClientUI(this.client, this.msgHandler).setVisible(true);
                     this.dispose();
 
@@ -182,6 +190,8 @@ public class LogInUI extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Fill all the blanks!", "Error", JOptionPane.ERROR_MESSAGE);
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(this, "Couldn't connect to server!", "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (NickWithSpacesException e) {
+            JOptionPane.showMessageDialog(this, "Please, do not use spaces in the nickname!", "Error", JOptionPane.ERROR_MESSAGE);
         }
 
     }//GEN-LAST:event_jConnectActionPerformed

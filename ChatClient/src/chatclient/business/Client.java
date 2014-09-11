@@ -21,6 +21,9 @@ import java.util.logging.Logger;
  */
 public class Client implements Runnable {
 
+    /**
+     * Enumeration of the available options to use in the chat.
+     */
     private enum UserOptions {
 
         HelpOption("/h"),
@@ -34,6 +37,11 @@ public class Client implements Runnable {
             this.option = option;
         }
 
+        /**
+         * Returns the User Option according to the command.
+         * @param s Command line option
+         * @return The UserOption.
+         */
         public static UserOptions getOption(String s) {
 
             UserOptions op = null;
@@ -50,7 +58,10 @@ public class Client implements Runnable {
                 case "/w":
                     op = PrivateMessageOption;
                     break;
-
+                    
+                default:
+                    op = InvalidOption;
+                    break;
             }
 
             return op;
@@ -95,6 +106,13 @@ public class Client implements Runnable {
     
     final Object staff = new Object();
 
+    /**
+     * This class implements a client to connect to a specific server.
+     * @param ip Server IP.
+     * @param port Server port.
+     * @param nick Nickname to use in the chat.
+     * @throws IOException 
+     */
     public Client(String ip, int port, String nick) throws IOException {
 
         this.socket = new Socket(ip, port);
@@ -112,34 +130,63 @@ public class Client implements Runnable {
 
     }
     
+    /**
+     * Returns the clients nickname.
+     * @return A <code>String</code> containing the nickname.
+     */
     public String getNick() {
         return this.nick;
     }
     
+    /**
+     * Sets the client nickname to the requested nickname.
+     */
     public void setNick() {
         this.nick = tmpNick;
     }
     
-    int getClientID() {
+    /**
+     * Gets the clients identification number.
+     * @return A <code>int</code> containing the id.
+     */
+    public int getClientID() {
         return this.ClientID;
     }
 
+    /**
+     * Sets the client identification number.
+     * @param id The ID number.
+     */
     public void setClientID(int id) {
         this.ClientID = id;
     }
     
+    /**
+     * Returns the id state of the client.
+     * @return <code>true</code> if client ID has been setted.
+     */
     public boolean isIDSetted() {
         return this.isIDSetted;
     }
     
+    /**
+     * Sets the client as ID setted.
+     */
     public void setClientIDSetted() {
         this.isIDSetted = true;
     }
     
-    void invalidChecksumStack() {
+    /**
+     * Increments the stack of wrong received checksums.
+     */
+    public void invalidChecksumStack() {
         this.invalidChecksumStack++;
     }
     
+    /**
+     * Gets the list of online clients.
+     * @return <code>String</code> containing the list.
+     */
     public String getOnlineClientAsString() {
         
         String clients = "";
@@ -152,16 +199,25 @@ public class Client implements Runnable {
         
     }
 
+    /**
+     * Generic method to send an array of bytes to the server.
+     * @param msg <code>byte[]</code> containing the message.
+     * @throws IOException 
+     */
     private void sendMuchBytes(byte[] msg) throws IOException {
 
-        for (byte b : msg) {
+        for (byte b : msg) 
             this.output.writeByte(b);
-        }
-
+        
         Message.printMessage(msg);
 
     }
 
+    /**
+     * Attempts to get the client connected to server.
+     * @param nick Nickname that has been chosen by the user.
+     * @throws IOException 
+     */
     public void getConnected(String nick) throws IOException {
 
         byte[] msg = Message.getMsgAsByteVector(new Message(Services.HelloService.getByte(), nick.length() * BYTES_PER_CHAR, MsgUtils.stringToByteVector(nick)));
@@ -170,6 +226,11 @@ public class Client implements Runnable {
 
     }
 
+    /**
+     * Request to the server to change the client's nickname.
+     * @param newNick New nickname chosen by the user.
+     * @throws IOException 
+     */
     public void changeNickName(String newNick) throws IOException {
 
         byte[] msg = Message.getMsgAsByteVector(new Message(Services.ChangeNickService.getByte(), newNick.length() * BYTES_PER_CHAR, MsgUtils.stringToByteVector(newNick)));
@@ -178,6 +239,10 @@ public class Client implements Runnable {
 
     }
     
+    /**
+     * Request to the server the list of online clients.
+     * @throws IOException 
+     */
     public void requestOnlineClients() throws IOException {
         
         byte[] msg = Message.getMsgAsByteVector(new Message(Services.ConnectedClientsService.getByte(), 0, new byte[]{}));
@@ -186,28 +251,34 @@ public class Client implements Runnable {
         
         synchronized(staff) {
             try {
-                staff.wait();
+                staff.wait(); // Waits for the server answer.
             } 
             catch (InterruptedException ex) {
                 Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         
+        // If it gets here, the array list is ready.
         for ( OnlineClient oc : onlineClientsList ) {
-            this.requestNick(oc.getClientID());
+            this.requestNick(oc.getClientID()); // For each online client, requests its nickname.
             synchronized(staff) {
                 try {
-                    staff.wait();
+                    staff.wait(); // ... and wait for the server answer.
                 } 
                 catch (InterruptedException ex) {
                     Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-            oc.setNick(lastOnlineNick);
+            oc.setNick(lastOnlineNick); // Finally, sets the client's nickname.
         }
         
     }
     
+    /**
+     * Request to the server the nick of a specified client.
+     * @param iD Client's ID number.
+     * @throws IOException 
+     */
     private void requestNick(int iD) throws IOException {
         
         byte[] msg = Message.getMsgAsByteVector(new Message(Services.RequestNickService.getByte(), INT_SIZE, MsgUtils.integerToByteVector(iD)));
@@ -216,12 +287,19 @@ public class Client implements Runnable {
         
     }
 
-    private void sendMessage(String msg, int FROM, int TO) throws IOException {
+    /**
+     * Sends a message.
+     * @param msg A <code>String</code> containing the message.
+     * @param from An <code>int</code> containing the sender ID.
+     * @param to An <code>int</code> containing the recipient ID.
+     * @throws IOException 
+     */
+    private void sendMessage(String msg, int from, int to) throws IOException {
 
         byte[] data = new byte[FROM_TO_ID_SIZE + msg.length() * BYTES_PER_CHAR];
 
-        System.arraycopy(MsgUtils.integerToByteVector(FROM), 0, data, 0, 4);
-        System.arraycopy(MsgUtils.integerToByteVector(TO), 0, data, 4, 4);
+        System.arraycopy(MsgUtils.integerToByteVector(from), 0, data, 0, 4);
+        System.arraycopy(MsgUtils.integerToByteVector(to), 0, data, 4, 4);
         System.arraycopy(MsgUtils.stringToByteVector(msg), 0, data, 8, msg.length() * BYTES_PER_CHAR);
 
         byte[] byteMsg = Message.getMsgAsByteVector(new Message(Services.SendMsgService.getByte(), data.length, data));
@@ -230,6 +308,10 @@ public class Client implements Runnable {
 
     }
     
+    /**
+     * Sends the goodbye service to get disconnected from the server.
+     * @throws IOException 
+     */
     public void sendGoodbye() throws IOException {
         
         byte[] byteMsg = Message.getMsgAsByteVector(new Message(Services.ByeService.getByte(),0,new byte[]{}));
@@ -238,6 +320,11 @@ public class Client implements Runnable {
         
     }
 
+    /**
+     * Method to get messages from the server.
+     * @return Returns an object <code>Message</code>.
+     * @throws IOException 
+     */
     private Message receiveMessage() throws IOException {
 
         byte service;
@@ -258,6 +345,12 @@ public class Client implements Runnable {
 
     }
     
+    /**
+     * Decodes what the user typed in the sender field.
+     * @param msg A <code>String</code> with the message.
+     * @return Returns a feedback according to what was typed.
+     * @throws IOException 
+     */
     public String DecodeUserMessage(String msg) throws IOException {
 
         String feedBack = "";
@@ -285,8 +378,13 @@ public class Client implements Runnable {
                             destinyID = oc.getClientID();
                         }
                     }
+                    if ( destinyID != this.ClientID ) {
+                        this.sendMessage(splittedMsg[2], USER_ID, destinyID);
+                    }
+                    else {
+                        feedBack = "[ERROR]: This client is not online!\n";
+                    }
                     
-                    this.sendMessage(splittedMsg[2], USER_ID, destinyID);
                     break;
 
                 case InvalidOption:
@@ -310,12 +408,23 @@ public class Client implements Runnable {
 
             try {
 
-                Message msg = this.receiveMessage();
-                int checksum = this.input.readShort();
-                if (Message.getCheckSum(msg) == checksum) {
-                    System.out.print("FROM " + this.ClientID + ": ");
-                    Message.printMessage(Message.getMsgAsByteVector(msg));
-                    MessageHandler.addMessage(msg);
+                Message msg = this.receiveMessage(); // Receive the message from server.
+                
+                int checksum = this.input.readShort(); // Receive the checksum.
+                
+                if (Message.getCheckSum(msg) == checksum) { // If the checksum is right...
+                    System.out.print("FROM " + this.ClientID + ": "); // Prints the message in the console.
+                    Message.printMessage(Message.getMsgAsByteVector(msg)); // ...
+                    MessageHandler.addMessage(msg); // Then handle the message.
+                    invalidChecksumStack = 0; // Resets the stack.
+                }
+                else {
+                    invalidChecksumStack++; // If not, increments the invalidChecksumStack.
+                }
+                
+                if ( invalidChecksumStack == 3 ) { // If it stacks the max, closes the chat.
+                    System.out.println("Invalid checksum stacked 3 times. Chat is now going to be closed.");
+                    System.exit(1);
                 }
 
             } catch (IOException e) {

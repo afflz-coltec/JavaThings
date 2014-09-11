@@ -7,9 +7,9 @@
 package chatclient.exceptions;
 
 /**
- *
- * @author strudel
+ * 
+ * @author Sammy Guergachi <sguergachi at gmail.com>
  */
-public class NoConnectionEstablished extends Exception {
-    
+public class NickWithSpacesException extends Exception{
+
 }
