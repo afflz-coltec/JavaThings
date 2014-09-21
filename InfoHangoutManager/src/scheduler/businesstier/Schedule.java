@@ -13,6 +13,11 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import scheduler.datatier.DAO;
+import scheduler.datatier.DAO.DataTypes;
+import scheduler.datatier.DAO.QueryType;
+import scheduler.exceptions.EventNotFoundException;
+import scheduler.exceptions.NotFoundException;
+import scheduler.exceptions.ScheduleNotFoundException;
 
 /**
  * 
@@ -27,26 +32,50 @@ public class Schedule implements StoreManagement {
     private int iD;
     private String name;
     private String description;
+    private boolean isNew;
 
-    public Schedule(String name, String description) {
+    /**
+     * Contructor to instanciate a Schedule.
+     * @param name
+     * @param description
+     * @param isNew 
+     */
+    public Schedule(String name, String description, boolean isNew) {
         this.name = name;
         this.description = description;
         this.iD = ++lastID;
+        this.isNew = isNew;
     }
     
-    static {
+    public Schedule(String name, String description) {
+        this(name,description,true);
+    }
+    
+    public Schedule() {
         
-        String query = "SELECT MAX(ID) FROM schedules";
-        
-        try {
-            PreparedStatement stmt = DAO.getConnection().prepareStatement(query);
-            ResultSet rs = DAO.getData(stmt);
-            Schedule.lastID = rs.getInt("MAX(ID)");
-        }
-        catch (SQLException e) {
-            
-        }
-        
+    }
+    
+    /**
+     * Avoid the waste of identification numbers.
+     */
+    public static void fixLastID() {
+        lastID--;
+    }
+    
+    public boolean isNew() {
+        return this.isNew;
+    }
+    
+    public void setIsNew(boolean isNew) {
+        this.isNew = isNew;
+    }
+    
+    public int getiD() {
+        return iD;
+    }
+
+    public void setiD(int iD) {
+        this.iD = iD;
     }
 
     public String getName() {
@@ -64,64 +93,66 @@ public class Schedule implements StoreManagement {
     public void setDescription(String description) {
         this.description = description;
     }
-
-    public int getID() {
-        return iD;
+    
+    public static Schedule getScheduleByID(int id) throws SQLException, ScheduleNotFoundException {
+        try {
+            return (Schedule) DAO.getData(DataTypes.isSchedule, QueryType.queryByID, id);
+        } catch (NotFoundException ex) {
+            throw new ScheduleNotFoundException();
+        }
     }
     
-    public Schedule getAgendaByID(int id) {
-        Schedule ag = null;
-        
-        for(Schedule a : agendaList)
-            ag = a.getID() == id ? a : null;
-            
-        return ag;
-    }
-    
-    public ArrayList<Schedule> getAgendaByName(String name) {
-        
-        ArrayList<Schedule> list = new ArrayList<>();
-        
-        for(Schedule a : agendaList) 
-            if ( a.getName().equals(name) )
-                list.add(a);
-        
-        return list;
+    public static ArrayList<Schedule> getScheduleByName(String name) throws SQLException, ScheduleNotFoundException {
+        try {
+            return DAO.getData(DataTypes.isSchedule, QueryType.queryByName, name);
+        } catch (NotFoundException ex) {
+            throw new ScheduleNotFoundException();
+        }
     }
 
     @Override
     public void store() {
-        
-        String query = "INSERT INTO schedules (ID,Name,Description) VALUES(?,?,?)";
-        
-        try {
-            PreparedStatement stmt = DAO.getConnection().prepareStatement(query);
-            stmt.setInt(1, this.iD);
-            stmt.setString(2, this.name);
-            stmt.setString(3, this.description);
-            
-            DAO.save(stmt);
-            
-        } catch (SQLException ex) {
-            Logger.getLogger(Schedule.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
+        DAO.save(this);
     }
 
     @Override
     public void remove() {
         
-        String removeSchedule = "DELETE schd,evt FROM schedule AS schd, events AS evt WHERE schd.ID=evt.Schedule AND schd.ID=?";
-        
         try {
-            
-            PreparedStatement stmt = DAO.getConnection().prepareStatement(removeSchedule);
-            stmt.setInt(1, this.iD);
-            
-            DAO.remove(stmt);
-            
+            DAO.remove(this);
         } catch (SQLException ex) {
             Logger.getLogger(Schedule.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (EventNotFoundException ex) {
+            Logger.getLogger(Schedule.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
+    
+    public void print() {
+        System.out.println( "\nSchedule " + this.iD + 
+                            "\nName: " + this.name + 
+                            "\nDescription: " + this.description);
+    }
+    
+    /**
+     * Automatically gets the last used ID.
+     */
+    static {
+        
+        String query = "SELECT MAX(ID) AS id FROM schedules";
+        
+        try {
+            PreparedStatement stmt = DAO.getConnection().prepareStatement(query);
+            ResultSet rs = DAO.getData(stmt);
+            
+            rs.next();
+            Schedule.lastID = rs.getInt("id");
+            
+            stmt.close();
+            rs.close();
+        }
+        catch (SQLException ex) {
+            Logger.getLogger(Person.class.getName()).log(Level.SEVERE, null, ex);
         }
         
     }

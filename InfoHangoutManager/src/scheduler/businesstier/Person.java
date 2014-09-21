@@ -8,13 +8,15 @@ package scheduler.businesstier;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import scheduler.datatier.DAO;
+import scheduler.datatier.DAO.DataTypes;
+import scheduler.datatier.DAO.QueryType;
+import scheduler.exceptions.NotFoundException;
+import scheduler.exceptions.PersonNotFoundException;
 
 /**
  * 
@@ -28,16 +30,42 @@ public class Person implements StoreManagement {
     private String name;
     private String address;
     private Date birthDate;
+    private boolean isNew;
 
-    public Person(String CPF, String name, String address, Date birthDate) {
+    /**
+     * Constructor to instanciate a Person object.
+     * @param CPF
+     * @param name
+     * @param address
+     * @param birthDate
+     * @param isNew 
+     */
+    public Person(String CPF, String name, String address, Date birthDate, boolean isNew) {
         this.CPF = CPF;
         this.name = name;
         this.address = address;
         this.birthDate = birthDate;
+        this.isNew = isNew;
+    }
+    
+    public Person(String CPF, String name, String address, Date birthDate) {
+        this(CPF,name,address,birthDate,true);
+    }
+    
+    public Person() {
+        
     }
 
+    public boolean isNew() {
+        return isNew;
+    }
+
+    public void setIsNew(boolean isNew) {
+        this.isNew = isNew;
+    }
+    
     public String getCPF() {
-        return CPF;
+        return this.CPF;
     }
 
     public void setCPF(String CPF) {
@@ -45,7 +73,7 @@ public class Person implements StoreManagement {
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public void setName(String name) {
@@ -53,7 +81,7 @@ public class Person implements StoreManagement {
     }
 
     public String getAddress() {
-        return address;
+        return this.address;
     }
 
     public void setAddress(String address) {
@@ -61,56 +89,57 @@ public class Person implements StoreManagement {
     }
 
     public Date getBirthDate() {
-        return birthDate;
+        return this.birthDate;
     }
 
     public void setBirthDate(Date birthDate) {
         this.birthDate = birthDate;
     }
 
-    public static Person getPersonByCPF(String cpf) throws SQLException {
-        
-        Person prs = null;
-        
-        String getPersonByCPFQuery = "SELECT CPF,Name,Address,BirthDay FROM person WHERE cpf=?";
-        
-        PreparedStatement stmt = DAO.getConnection().prepareStatement(getPersonByCPFQuery);
-        
-        stmt.setString(1, cpf);
-        
-        ResultSet rs = DAO.getData(stmt);
-        
-        prs = new Person(rs.getString("CPF"), rs.getString("Name"), rs.getString("Address"), rs.getDate("BirthDay"));
-        
-        return prs;
-        
+    public static Person getPersonByCPF(String cpf) throws SQLException, PersonNotFoundException {
+        try {
+            return (Person) DAO.getData(DataTypes.isPerson, QueryType.queryByCPF, cpf).remove(0);
+        } catch (NotFoundException ex) {
+            throw new PersonNotFoundException();
+        }
+    }
+    
+    public static ArrayList<Person> getPersonByName(String name) throws SQLException, PersonNotFoundException {
+        try {
+            return DAO.getData(DataTypes.isPerson,QueryType.queryByName,name);
+        } catch (NotFoundException ex) {
+            throw new PersonNotFoundException();
+        }
+    }
+    
+    public static ArrayList<Person> getPersonByBirthDay(Date start, Date end) throws SQLException, PersonNotFoundException {
+        try {
+            return DAO.getData(DataTypes.isPerson, QueryType.queryByBirthDay, start, end);
+        } catch (NotFoundException ex) {
+            throw new PersonNotFoundException();
+        }
+    }
+    
+    public void print() {
+        System.out.println( "\nName: " + this.name + 
+                            "\nCPF: " + this.CPF + 
+                            "\nAddress: " + this.address + 
+                            "\nBirthDay: " + this.birthDate.toString());
     }
     
     @Override
     public void store() {
-        
-        String addPerson = "INSERT INTO people VALUES(?,?,?,?);";
-        
-        try {
-            PreparedStatement stmt = DAO.getConnection().prepareStatement(addPerson);
-            
-            stmt.setString(1, this.CPF);
-            stmt.setString(2, this.name);
-            stmt.setString(3, this.address);
-            stmt.setDate(4, this.birthDate);
-            
-            DAO.save(stmt);
-            
-        } catch (SQLException ex) {
-            Logger.getLogger(Person.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
+        DAO.save(this);
     }
 
     @Override
     public void remove() {
         
-        String removePerson = "DELETE prs,evt FROM people AS prs, events AS evt WHERE prs.ID=evt.Schedule AND prs.ID=?";
+        try {
+            DAO.remove(this);
+        } catch (SQLException ex) {
+            Logger.getLogger(Person.class.getName()).log(Level.SEVERE, null, ex);
+        }
         
     }
 
