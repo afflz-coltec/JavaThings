@@ -15,9 +15,14 @@ import java.sql.SQLException;
  */
 public class ConnectionFactory {
 
+    private static Connection connection;
+    
     public Connection getConnection() {
         try {
-            return DriverManager.getConnection("jdbc:mysql://150.164.102.160/daw-aluno9", "daw-aluno9", "daw09");
+            if ( connection == null )
+                connection = DriverManager.getConnection("jdbc:mysql://150.164.102.160/daw-aluno9", "daw-aluno9", "daw09");
+            
+            return connection;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

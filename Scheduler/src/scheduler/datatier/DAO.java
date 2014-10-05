@@ -507,6 +507,7 @@ public class DAO {
      * Removes a Schedule from th e DB.
      * @param s
      * @throws SQLException 
+     * @throws scheduler.exceptions.EventNotFoundException 
      */
     public static void remove(Schedule s) throws SQLException, EventNotFoundException {
         
