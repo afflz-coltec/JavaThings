@@ -234,7 +234,6 @@ public class GUI extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Contacts Manager");
-        setPreferredSize(new java.awt.Dimension(700, 650));
         setResizable(false);
 
         jTabbedPane1.setPreferredSize(new java.awt.Dimension(617, 630));
