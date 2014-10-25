@@ -45,7 +45,7 @@ public class ContactDAO {
 
         PreparedStatement stmt = connection.prepareStatement(sql);
 
-        stmt.setString(1, contact.getFirstName());
+        stmt.setString(1, contact.getFirstname());
         stmt.setString(2, contact.getLastName());
         stmt.setString(3, contact.getEmail());
         stmt.setString(4, contact.getAddr());
@@ -122,7 +122,7 @@ public class ContactDAO {
         
     }
     
-    public static ArrayList<Contact> getList() throws SQLException {
+    public  ArrayList<Contact> getList() throws SQLException {
         
         ArrayList<Contact> contacts = new ArrayList<>();
         

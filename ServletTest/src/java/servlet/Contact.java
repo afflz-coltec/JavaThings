@@ -40,7 +40,7 @@ public class Contact {
         this.id = id;
     }
 
-    public String getFirstName() {
+    public String getFirstname() {
         return first_name;
     }
 

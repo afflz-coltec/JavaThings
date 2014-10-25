@@ -21,12 +21,16 @@ public class Game {
     
     static final int WIDTH = 1280;
     static final int HEIGHT = 720;
+    
+    public Game() {
+        
+    }
 
     public static void main(String[] args) {
         
         try {
             
-            AppGameContainer notstarcraft = new AppGameContainer(new NotStarCraft("Not Star Craft!"));
+            AppGameContainer notstarcraft = new AppGameContainer(new NotStarCraft("Not Star Craft!",WIDTH,HEIGHT));
             notstarcraft.setDisplayMode(WIDTH, HEIGHT, false);
             notstarcraft.start();
             

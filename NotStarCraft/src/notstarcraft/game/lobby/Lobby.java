@@ -6,6 +6,7 @@
 
 package notstarcraft.game.lobby;
 
+import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.SlickException;
@@ -18,7 +19,9 @@ import org.newdawn.slick.state.StateBasedGame;
  */
 public class Lobby extends BasicGameState {
 
-    public static final int STATE_ID = 3;
+    public static final int STATE_ID = 1;
+    
+    private History history;
 
     @Override
     public int getID() {
@@ -27,12 +30,14 @@ public class Lobby extends BasicGameState {
 
     @Override
     public void init(GameContainer container, StateBasedGame game) throws SlickException {
-        
+        history = new History(container);
+        history.setLocation(100, 100);
     }
 
     @Override
     public void render(GameContainer container, StateBasedGame game, Graphics g) throws SlickException {
-        
+        g.setBackground(Color.white);
+        history.render(container, g);
     }
 
     @Override
