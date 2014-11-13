@@ -122,7 +122,7 @@ public class ContactDAO {
         
     }
     
-    public  ArrayList<Contact> getList() throws SQLException {
+    public ArrayList<Contact> getList() throws SQLException {
         
         ArrayList<Contact> contacts = new ArrayList<>();
         

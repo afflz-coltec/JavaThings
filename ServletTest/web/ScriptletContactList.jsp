@@ -21,9 +21,9 @@
     </head>
     <body>
         <div class="container">
-            <c:import url="header.jsp" />
+            <h1 class="text-center">Contact List</h1>
             <div class="table-responsive">
-                <table class="table table-striped table-bordered">
+                <table class="table table-striped table-bordered table-hover">
                     <thead>
                         <tr>
                             <td>Name</td>
@@ -51,7 +51,7 @@
                     </c:forEach>
 
                 </table>
-                    <c:import url="footer.jsp" />
+                <h4 class="text-center">Copyright 2014 - Aula de TP</h4>
             </div>
         </div>
     </body>

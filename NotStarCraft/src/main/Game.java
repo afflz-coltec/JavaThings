@@ -32,6 +32,7 @@ public class Game {
             
             AppGameContainer notstarcraft = new AppGameContainer(new NotStarCraft("Not Star Craft!",WIDTH,HEIGHT));
             notstarcraft.setDisplayMode(WIDTH, HEIGHT, false);
+            notstarcraft.setVSync(true);
             notstarcraft.start();
             
         } catch (SlickException ex) {

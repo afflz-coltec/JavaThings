@@ -12,6 +12,7 @@ import java.sql.Date;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -51,11 +52,8 @@ public class AddContactServlet extends HttpServlet {
             
             ContactDAO.addContact(c);
             
-            out.println("<html>");
-            out.println("<body>");
-            out.println("Contact " + fname + " " + lname + " successfully added!");
-            out.println("</body>");
-            out.println("</html>");
+            RequestDispatcher rd = request.getRequestDispatcher("/added-contact.jsp");
+            rd.forward(request, response);
             
         } catch (SQLException ex) {
             out.println(ex.getMessage());
