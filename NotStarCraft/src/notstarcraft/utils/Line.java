@@ -39,15 +39,9 @@ public final class Line {
     }
     
     public void updateFunction(float x0, float y0, float x1, float y1) {
-        if( (x1-x0) == 0 ) 
-            this.a = 0;
-        else 
-            this.a = ( (y1 - y0) / (x1 - x0) );
+        this.a = ( (y1 - y0) / (x1 - x0) );
         
-        if( (x1-x0) == 0 )
-            this.c = 0;
-        else
-            this.c = ( ((y0*x1) - (y1*x0)) / (x1 - x0) );
+        this.c = ( ((y0*x1) - (y1*x0)) / (x1 - x0) );
     }
     
     public static float getPointToPointDistance(double x0, double y0, double x1, double y1) {

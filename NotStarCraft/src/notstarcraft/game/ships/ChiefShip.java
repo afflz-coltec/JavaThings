@@ -51,7 +51,7 @@ public class ChiefShip extends Ship {
             isMoving = true;
         }
         
-        if( isMoving ) {
+        if( isMoving && !isTurning ) {
             moveShip(delta);
         }
         
@@ -66,14 +66,14 @@ public class ChiefShip extends Ship {
     public void rotate(int x, int y) {
         Line newPath = new Line(this.centerX, this.centerY, x, y);
         
-        float rad = verticalLine.calculateAngle(newPath);
+        float rad = widthLine.calculateAngle(newPath);
         
         if( rad < 0 )
             angleToRotate = (float) (90.0f + Math.toDegrees(rad));
         else if( rad > 0 )
             angleToRotate = (float) Math.toDegrees(rad);
         
-        verticalLine = newPath;
+        widthLine = newPath;
     }
     
     
