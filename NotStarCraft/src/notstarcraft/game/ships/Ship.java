@@ -91,20 +91,71 @@ public abstract class Ship {
     
     public void moveShip(int delta) {
         
-        if( movingToX > centerX )
+        if( movingToX > centerX ) {
+            isXMovingRight = true;
+            isXMovingLeft = false;
             centerX += delta/10;
+        }
          
-        if( movingToX < centerY )
+        if( movingToX < centerX ) {
+            isXMovingLeft = true;
+            isXMovingRight = false;
             centerX -= delta/10;
+        }
         
-        if( movingToY < centerY )
+        if( movingToX == centerX ) {
+            isXMovingRight = false;
+            isXMovingLeft = false;
+        }
+        
+        if( movingToY < centerY ) {
+            isYMovingUp = true;
+            isYMovingDown = false;
             centerY -= delta/10;
+        }
         
-        if( movingToY > centerY )
+        if( movingToY > centerY ) {
+            isYMovingDown = true;
+            isYMovingUp = false;
             centerY += delta/10;
+        }
         
-        if( !isXMoving && !isYMoving ) {
+        if( movingToY == centerY ) {
+            isYMovingUp = false;
+            isYMovingDown = false;
+        }
+        
+        if( isXMovingRight && !isYMovingUp && !isYMovingDown ) {
+            shipImage = shipRight;
+        }
+        if( isXMovingLeft && !isYMovingUp && !isYMovingDown ) {
+            shipImage = shipLeft;
+        }
+        if( isYMovingUp && !isXMovingRight && !isXMovingLeft ) {
+            shipImage = shipUp;
+        }
+        if( isYMovingDown && !isXMovingRight && !isXMovingLeft ) {
+            shipImage = shipDown;
+        }
+        if( isXMovingRight && isYMovingUp ) {
+            shipImage = shipUpRight;
+        }
+        if( isXMovingLeft && isYMovingUp ) {
+            shipImage = shipUpLeft;
+        }
+        if( isXMovingRight && isYMovingDown ) {
+            shipImage = shipDownRight;
+        }
+        if( isXMovingLeft && isYMovingDown ) {
+            shipImage = shipDownLeft;
+        }
+        
+        if( centerX == movingToX && centerY == movingToY ) {
             isMoving = false;
+            isXMovingLeft = false;
+            isXMovingRight = false;
+            isYMovingUp = false;
+            isYMovingDown = false;
         }
         
     }
@@ -114,8 +165,6 @@ public abstract class Ship {
         this.movingToX = posX;
         this.movingToY = posY;
         
-        this.isXMoving = true;
-        this.isYMoving = true;
         this.isMoving = true;
         
     }
