@@ -22,8 +22,14 @@ public abstract class Ship {
 
     protected Image shipImage;
     
-    protected float x;
-    protected float y;
+    protected Image shipUp;
+    protected Image shipDown;
+    protected Image shipRight;
+    protected Image shipLeft;
+    protected Image shipUpRight;
+    protected Image shipUpLeft;
+    protected Image shipDownRight;
+    protected Image shipDownLeft;
     
     protected float centerX;
     protected float centerY;
@@ -37,6 +43,7 @@ public abstract class Ship {
     protected Line widthLine;
     protected Line heightLine;
     
+    protected float currentAngle;
     protected float angleToRotate;
     
     protected Rectangle selectionRect;
@@ -46,25 +53,31 @@ public abstract class Ship {
     protected boolean isMoving = false;
     protected boolean isXMoving = false;
     protected boolean isYMoving = false;
+    protected boolean isXMovingRight = false;
+    protected boolean isXMovingLeft = false;
+    protected boolean isYMovingUp = false;
+    protected boolean isYMovingDown = false;
 
-    protected Ship(float centerX, float centerY, Image shipImage) {
+    protected Ship(float centerX, float centerY, Image[] shipImages) {
         
         this.centerX = centerX;
         this.centerY = centerY;
         
-        this.shipImage = shipImage;
-        this.shipImage.rotate(90);
-        this.width = shipImage.getWidth();
-        this.height = shipImage.getHeight();
+        shipUp          = shipImages[0];
+        shipDown        = shipImages[1];
+        shipRight       = shipImages[2];
+        shipLeft        = shipImages[3];
+        shipUpRight     = shipImages[4];
+        shipUpLeft      = shipImages[5];
+        shipDownRight   = shipImages[6];
+        shipDownLeft    = shipImages[7];
         
-        this.widthLine = new Line(centerX, centerY, centerX, centerY-this.height/2);
-         
-        this.x = Math.round(Math.cos(Math.atan(widthLine.getCoefA())) * (-this.shipImage.getWidth()/2) - Math.sin(Math.atan(widthLine.getCoefA())) * (-this.shipImage.getHeight()/2) ) + centerX;
-        this.y = Math.round(Math.sin(Math.atan(widthLine.getCoefA())) * (-this.shipImage.getWidth()/2) + Math.cos(Math.atan(widthLine.getCoefA())) * (-this.shipImage.getHeight()/2) ) + centerY;
+        this.shipImage = shipUp;
         
-        selectionRect = new Rectangle(0, 0, height, width);
-        selectionRect.setCenterX(centerX);
-        selectionRect.setCenterY(centerY);
+        this.width = this.shipImage.getWidth();
+        this.height = this.shipImage.getHeight();
+        
+        this.widthLine = new Line(centerX, centerY, centerX+width/2, centerY);
         
     }
     
@@ -78,88 +91,33 @@ public abstract class Ship {
     
     public void moveShip(int delta) {
         
-
-        if( movingToX > centerX ) {
-            float newCenterX = (float) (
-                centerX
-                + ((delta/10)
-                * getSpeed()
-                * Math.cos(Math.atan(widthLine.getCoefA())
-                ))
-            );
-            this.centerX = newCenterX;
-            selectionRect.setCenterX(newCenterX);
-            
-            if( centerX > movingToX  )
-                isXMoving = false;
-        }
-        else if ( movingToX < centerX ) {
-            float newCenterX = (float) (
-                centerX
-                - ((delta/10)
-                * getSpeed()
-                * Math.cos(Math.atan(widthLine.getCoefA())
-                ))
-            );
-            this.centerX = newCenterX;
-            selectionRect.setCenterX(newCenterX);
-            
-            if( centerX < movingToX  )
-                isXMoving = false;
-        }
+        if( movingToX > centerX )
+            centerX += delta/10;
+         
+        if( movingToX < centerY )
+            centerX -= delta/10;
         
-        if( movingToY > centerY ) {
-            float newCenterY = (float) (
-                centerY 
-                + ((delta/10) 
-                * getSpeed() 
-                * Math.sin(Math.atan(widthLine.getCoefA())
-                ))
-            );
-            this.centerY = newCenterY;
-            selectionRect.setCenterY(newCenterY);
-            
-            if( centerY < movingToY  )
-                isYMoving = false;
-        }
-        else if( movingToY < centerY ) {
-            float newCenterY = (float) (
-                centerY
-                - ((delta/10) 
-                * getSpeed() 
-                * Math.sin(Math.atan(widthLine.getCoefA())
-                ))
-            );
-            this.centerY = newCenterY;
-            selectionRect.setCenterY(newCenterY);
-            
-            if( centerY > movingToY  )
-                isYMoving = false;
-        }
+        if( movingToY < centerY )
+            centerY -= delta/10;
         
-        if( !isXMoving && !isYMoving )
+        if( movingToY > centerY )
+            centerY += delta/10;
+        
+        if( !isXMoving && !isYMoving ) {
             isMoving = false;
+        }
         
     }
     
     public void moveTo(int posX, int posY) {
-        movingToX = posX;
-        movingToY = posY;
         
-        isXMoving = (posX != centerX);
-        isYMoving = (posY != centerY);
+        this.movingToX = posX;
+        this.movingToY = posY;
         
-        rotate(posX, posY);
+        this.isXMoving = true;
+        this.isYMoving = true;
+        this.isMoving = true;
         
-        isMoving = true;
-    }
-    
-    public float getX() {
-        return this.x;
-    }
-
-    public float getY() {
-        return this.y;
     }
 
     public float getCenterX() {

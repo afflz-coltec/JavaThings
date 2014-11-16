@@ -106,18 +106,6 @@ public class BattleField extends BasicGameState {
     @Override
     public void update(GameContainer gc, StateBasedGame game, int delta) throws SlickException {
         
-        oldY = newY;
-        newY = mapY;
-        oldX = newX;
-        newX = mapX;
-        
-        if( oldX != 0 ) {
-            p1Ship.setCenterX(p1Ship.getCenterX() + (newX-oldX));
-        }
-        if( oldY != 0 ) {
-            p1Ship.setCenterY(p1Ship.getCenterY() + (newY-oldY));
-        }
-        
         Input input = gc.getInput();
         
         if( input.getMouseX() > 1270 || input.isKeyDown(Input.KEY_RIGHT) ) {
@@ -147,6 +135,18 @@ public class BattleField extends BasicGameState {
             if( mapY >= 0 )
                 mapY -= mapY;
             
+        }
+        
+        oldY = newY;
+        newY = mapY;
+        oldX = newX;
+        newX = mapX;
+        
+        if( oldX != 0 ) {
+            p1Ship.setCenterX(p1Ship.getCenterX() + (newX-oldX));
+        }
+        if( oldY != 0 ) {
+            p1Ship.setCenterY(p1Ship.getCenterY() + (newY-oldY));
         }
         
         p1Ship.update(gc, game, delta);

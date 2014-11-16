@@ -16,8 +16,20 @@ public final class Line {
     private final float b = -1;
     private float c;
     
+    private Line perpendLine;
+    
+    public Line(float a, float x, float y) {
+        this.a = a;
+        this.c = -a*x - b*y;
+    }
+    
     public Line(float x0, float y0, float x1, float y1) {
         updateFunction(x0, y0, x1, y1);
+        perpendLine = new Line((float) (Math.pow(this.a, -1)*(-1)), x0, y0);
+    }
+    
+    public Line getPerpendLine() {
+        return this.perpendLine;
     }
     
     public double getCoefA() {
