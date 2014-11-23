@@ -5,7 +5,12 @@
  </tileset>
  <layer name="Camada de Tiles 1" width="60" height="34">
   <data encoding="base64" compression="gzip">
-   H4sIAAAAAAAAC+3DQQ0AAAwDobNQ/2ZnYw9IWDVVVVVVVVVV9fUDHYU+bOAfAAA=
+   H4sIAAAAAAAAA+3DQQ0AAAwDobNQ/2ZnYw9IWDVVVVVVVVVV9fUDHYU+bOAfAAA=
+  </data>
+ </layer>
+ <layer name="Objects" width="60" height="34">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAA+3ZsQ2AQAzF0AiYADEBsAlsAPvPQqhJfUg+W/p9Xp0hIsZONuXm6Kclvt4jd/5wS4sq75W7f7ilRZWXnF52etnpZaeXnV52etnpZaeXnV52etnpZaeXnV5O1R+M7K3+YGRv1etdc1sn23MPIyHoYOAfAAA=
   </data>
  </layer>
 </map>

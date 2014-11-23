@@ -6,12 +6,15 @@
 
 package notstarcraft.game.ships;
 
-import notstarcraft.utils.Line;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
+import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.geom.Rectangle;
+import org.newdawn.slick.geom.Vector2f;
 import org.newdawn.slick.state.StateBasedGame;
 
 /**
@@ -31,150 +34,104 @@ public abstract class Ship {
     protected Image shipDownRight;
     protected Image shipDownLeft;
     
-    protected float centerX;
-    protected float centerY;
-    
     protected float movingToX;
     protected float movingToY;
     
     protected float width;
     protected float height;
     
-    protected Line widthLine;
-    protected Line heightLine;
+    protected Vector2f position;
+    protected Vector2f speed;
     
-    protected float currentAngle;
-    protected float angleToRotate;
+    protected Rectangle hitBox;
     
-    protected Rectangle selectionRect;
-    
-    protected boolean isSelected = true;
-    protected boolean isTurning = false;
+//    protected boolean isSelected = false;
     protected boolean isMoving = false;
-    protected boolean isXMoving = false;
-    protected boolean isYMoving = false;
-    protected boolean isXMovingRight = false;
-    protected boolean isXMovingLeft = false;
-    protected boolean isYMovingUp = false;
-    protected boolean isYMovingDown = false;
 
-    protected Ship(float centerX, float centerY, Image[] shipImages) {
+    protected Ship(float centerX, float centerY) {
         
-        this.centerX = centerX;
-        this.centerY = centerY;
+        this.position = new Vector2f(centerX, centerY);
         
-        shipUp          = shipImages[0];
-        shipDown        = shipImages[1];
-        shipRight       = shipImages[2];
-        shipLeft        = shipImages[3];
-        shipUpRight     = shipImages[4];
-        shipUpLeft      = shipImages[5];
-        shipDownRight   = shipImages[6];
-        shipDownLeft    = shipImages[7];
-        
-        this.shipImage = shipUp;
+        this.shipImage = getOriginalImage().copy();
         
         this.width = this.shipImage.getWidth();
         this.height = this.shipImage.getHeight();
         
-        this.widthLine = new Line(centerX, centerY, centerX+width/2, centerY);
+        hitBox = new Rectangle(0, 0, width*0.9f, height*0.9f);
+        hitBox.setCenterX(centerX);
+        hitBox.setCenterY(centerY);
         
     }
     
     public void setCenterX(float x) {
-        this.centerX = x;
+        this.position.x = x;
     }
     
     public void setCenterY(float y) {
-        this.centerY = y;
+        this.position.y = y;
     }
     
     public void moveShip(int delta) {
         
-        if( movingToX > centerX ) {
-            isXMovingRight = true;
-            isXMovingLeft = false;
-            centerX += delta/10;
+        boolean checkedY = false;
+        boolean checkedX = false;
+        
+        if( (movingToY-position.y) >= 0 && (speed.y) >= 0) {
+            checkedY = true;
         }
-         
-        if( movingToX < centerX ) {
-            isXMovingLeft = true;
-            isXMovingRight = false;
-            centerX -= delta/10;
+        else if( (movingToY-position.y) <= 0 && (speed.y) <= 0  ) {
+            checkedY = true;
         }
         
-        if( movingToX == centerX ) {
-            isXMovingRight = false;
-            isXMovingLeft = false;
+        if( (movingToX-position.x) >= 0 && (speed.x) >= 0) {
+            checkedX = true;
+        }
+        else if( (movingToX-position.x) <= 0 && (speed.x) <= 0  ) {
+            checkedX = true;
         }
         
-        if( movingToY < centerY ) {
-            isYMovingUp = true;
-            isYMovingDown = false;
-            centerY -= delta/10;
-        }
+        if( checkedY && checkedX ) {
+            Vector2f realSpeed = this.speed.copy();
+            realSpeed.scale(delta/10.0f);
         
-        if( movingToY > centerY ) {
-            isYMovingDown = true;
-            isYMovingUp = false;
-            centerY += delta/10;
+            position.add(realSpeed);
         }
-        
-        if( movingToY == centerY ) {
-            isYMovingUp = false;
-            isYMovingDown = false;
-        }
-        
-        if( isXMovingRight && !isYMovingUp && !isYMovingDown ) {
-            shipImage = shipRight;
-        }
-        if( isXMovingLeft && !isYMovingUp && !isYMovingDown ) {
-            shipImage = shipLeft;
-        }
-        if( isYMovingUp && !isXMovingRight && !isXMovingLeft ) {
-            shipImage = shipUp;
-        }
-        if( isYMovingDown && !isXMovingRight && !isXMovingLeft ) {
-            shipImage = shipDown;
-        }
-        if( isXMovingRight && isYMovingUp ) {
-            shipImage = shipUpRight;
-        }
-        if( isXMovingLeft && isYMovingUp ) {
-            shipImage = shipUpLeft;
-        }
-        if( isXMovingRight && isYMovingDown ) {
-            shipImage = shipDownRight;
-        }
-        if( isXMovingLeft && isYMovingDown ) {
-            shipImage = shipDownLeft;
-        }
-        
-        if( centerX == movingToX && centerY == movingToY ) {
+        else {
             isMoving = false;
-            isXMovingLeft = false;
-            isXMovingRight = false;
-            isYMovingUp = false;
-            isYMovingDown = false;
         }
         
     }
     
     public void moveTo(int posX, int posY) {
         
-        this.movingToX = posX;
-        this.movingToY = posY;
-        
-        this.isMoving = true;
+//        if( isSelected ) {
+            this.movingToX = posX;
+            this.movingToY = posY;
+            
+            float deltaY = movingToY-position.y;
+            float deltaX = movingToX-position.x;
+            float rad = (float) Math.atan2(deltaY, deltaX);
+            float alfa = (float)Math.toDegrees(rad);
+            this.shipImage = getOriginalImage();
+            shipImage.rotate(alfa);
+
+            this.speed = new Vector2f(getSpeed()*(float)Math.cos(rad), getSpeed()*(float)Math.sin(rad));
+            
+            this.isMoving = true;
+//        }
         
     }
+    
+//    public void setSelected(boolean isSelected) {
+//        this.isSelected = isSelected;
+//    }
 
     public float getCenterX() {
-        return this.centerX;
+        return this.position.x;
     }
     
     public float getCenterY() {
-        return this.centerY;
+        return this.position.y;
     }
     
     public float getWidth() {
@@ -185,12 +142,46 @@ public abstract class Ship {
         return this.height;
     }
     
+    public boolean isInside( float x, float y ) {
+        return hitBox.contains(x, y);
+    }
+    
+    public final void update(GameContainer gc, StateBasedGame game, int delta) throws SlickException {
+        
+        Input input = gc.getInput();
+        
+        if( input.isKeyDown(Input.KEY_W) ) {
+            this.position.y -= delta/3.0f;
+        }
+        if( input.isKeyDown(Input.KEY_S) ) {
+            this.position.y += delta/3.0f;
+        }
+        
+        if( input.isKeyDown(Input.KEY_D) ) {
+            this.position.x += delta/3.0f;
+        }
+        if( input.isKeyDown(Input.KEY_A) ) {
+            this.position.x -= delta/3.0f;
+        }
+        
+        float deltaY = input.getMouseY()-position.y;
+        float deltaX = input.getMouseX()-position.x;
+        
+        float rad = (float) Math.atan2(deltaY, deltaX);
+        float alfa = (float)Math.toDegrees(rad);
+        
+        this.shipImage = getOriginalImage().copy();
+        shipImage.rotate(alfa);
+        
+        hitBox.setCenterX(this.position.x);
+        hitBox.setCenterY(this.position.y);
+        
+    }
+    
+    protected abstract Image getOriginalImage();
+    
     public abstract void render(GameContainer container, Graphics g) throws SlickException;
     
-    public abstract void update(GameContainer gc, StateBasedGame game, int delta) throws SlickException;
-    
     public abstract float getSpeed();
-    
-    public abstract void rotate(int x, int y);
     
 }

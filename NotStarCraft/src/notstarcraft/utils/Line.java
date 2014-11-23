@@ -38,15 +38,16 @@ public final class Line {
     
     public float calculateAngle(Line l) {
         
-        if( this.a == 0 ) {
-            return (float) Math.atan(1/l.getCoefA());
-        }
-        else if( l.getCoefA() == 0 ) {
-            return (float) Math.atan(1/this.a);
-        }
-        else {
-            return (float) Math.atan((l.getCoefA()-this.a)/(1+l.getCoefA()*this.a));
-        }
+//        if( this.a == 0 )
+//            return (float) Math.atan(1/l.getCoefA());
+//        
+//        else if( l.getCoefA() == 0 )
+//            return (float) Math.atan(1/this.a);
+//        
+//        else 
+//            return (float) Math.atan((l.getCoefA()-this.a)/(1+l.getCoefA()*this.a));
+        
+        return 0.0f;
         
     }
     

@@ -4,14 +4,21 @@
  * and open the template in the editor.
  */
 
-package notstarcraft.utils;
+package notstarcraft.game.ships.projectile;
+
+import org.newdawn.slick.Image;
+import org.newdawn.slick.geom.Vector2f;
 
 /**
  * 
  * @author Sammy Guergachi <sguergachi at gmail.com>
  */
-public class ImageLoader {
-    
-    
+public abstract class Projectile {
 
+    protected Image projectile;
+    
+    protected Vector2f position;
+    
+    
+    
 }

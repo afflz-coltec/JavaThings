@@ -20,7 +20,7 @@ import org.newdawn.slick.SlickException;
 public class Game {
     
     static final int WIDTH = 1280;
-    static final int HEIGHT = 720;
+    static final int HEIGHT = 768;
     
     public Game() {
         
@@ -32,6 +32,7 @@ public class Game {
             
             AppGameContainer notstarcraft = new AppGameContainer(new NotStarCraft("Not Star Craft!",WIDTH,HEIGHT));
             notstarcraft.setDisplayMode(WIDTH, HEIGHT, false);
+            notstarcraft.setTargetFrameRate(60);
             notstarcraft.setVSync(true);
             notstarcraft.start();
             
