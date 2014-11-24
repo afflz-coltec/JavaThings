@@ -13,8 +13,8 @@ import java.sql.SQLException;
 import notstarcraft.game.player.Player;
 
 /**
- *
- * @author Sammy Guergachi <sguergachi at gmail.com>
+ * Self explanatory class.
+ * @author Pedro
  */
 public class SignInDAO {
 
@@ -28,10 +28,6 @@ public class SignInDAO {
         stmt.setString(1, username);
 
         ResultSet rs = stmt.executeQuery();
-
-//        if( rs.next() )
-//            if( rs.getString("password").equals(password) )
-//                return true;
 
         return rs.next() && rs.getString("password").equals(password);
 

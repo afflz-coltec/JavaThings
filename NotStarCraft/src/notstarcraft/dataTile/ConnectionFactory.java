@@ -8,21 +8,24 @@ package notstarcraft.dataTile;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
- * @author Sammy Guergachi <sguergachi at gmail.com>
+ * @author Pedro
  */
 public class ConnectionFactory {
 
     private static Connection connection;
     
+    /**
+     * Gets a connection with the database.
+     * @return 
+     */
     public static Connection getConnection() {
         
         try {
             
+            // Simple single ton(Not sure if its the right way to write it)
             if ( connection == null )
                 connection = DriverManager.getConnection("jdbc:mysql://localhost/NotStarCraftDB", "pedro", "p");
             

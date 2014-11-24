@@ -25,7 +25,7 @@ import org.newdawn.slick.tiled.TiledMap;
  */
 public class BattleField extends BasicGameState {
     
-    private static final int STATE_ID = 2;
+    public static final int STATE_ID = 1;
     
     private Image background;
     
@@ -45,6 +45,8 @@ public class BattleField extends BasicGameState {
 
     @Override
     public void init(GameContainer container, StateBasedGame game) throws SlickException {
+        
+        // Init all the members
         
         background = new Image("res/map/space-red.png");
         

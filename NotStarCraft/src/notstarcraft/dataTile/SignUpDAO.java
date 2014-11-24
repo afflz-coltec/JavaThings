@@ -13,8 +13,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * 
- * @author Sammy Guergachi <sguergachi at gmail.com>
+ * Self explanatory class.
+ * @author Pedro
  */
 public class SignUpDAO {
 

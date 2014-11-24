@@ -20,12 +20,16 @@ public class Game {
     static final int WIDTH = 1280;
     static final int HEIGHT = 768;
 
+    /**
+     * Instantiate a new Game.
+     * @throws SlickException 
+     */
     public Game() throws SlickException {
-        AppGameContainer notstarcraft = new AppGameContainer(new NotStarCraft("Not Star Craft!", WIDTH, HEIGHT));
-        notstarcraft.setDisplayMode(WIDTH, HEIGHT, false);
-        notstarcraft.setTargetFrameRate(60);
-        notstarcraft.setVSync(true);
-        notstarcraft.start();
+        AppGameContainer notstarcraft = new AppGameContainer(new NotStarCraft("Not Star Craft!"));
+        notstarcraft.setDisplayMode(WIDTH, HEIGHT, false); // Set the size and not fullscreen
+        notstarcraft.setTargetFrameRate(60); // Set the frame rate to 60FPS
+        notstarcraft.setVSync(true); // Turn vSync on
+        notstarcraft.start(); // Start the game
     }
 
 }
