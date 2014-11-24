@@ -10,7 +10,7 @@ import java.sql.Date;
 
 /**
  * 
- * @author Sammy Guergachi <sguergachi at gmail.com>
+ * @author Pedro
  */
 public class Player {
     

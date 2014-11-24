@@ -26,28 +26,37 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import notstarcraft.Game;
 import notstarcraft.dataTile.SignInDAO;
 import notstarcraft.exceptions.EmptyFieldException;
 import notstarcraft.exceptions.FailedLoginException;
 import notstarcraft.game.player.Player;
+import org.newdawn.slick.SlickException;
 
 /**
  *
- * @author Sammy Guergachi <sguergachi at gmail.com>
+ * @author Pedro
  */
 public class SignIn extends JFrame {
 
     private static final int WINDOW_WIDTH = 240;
     private static final int WINDOW_HEIGHT = 280;
 
+    /**
+     * Hard coded login screen. So proud of it TT.TT
+     */
     public SignIn() {
 
         initComponents();
 
     }
 
+    /**
+     * Initialize the components.
+     */
     private void initComponents() {
 
+        // Instatiate the components
         panel =         new JPanel();
         title =         new JLabel();
         userNameLabel = new JLabel();
@@ -57,6 +66,7 @@ public class SignIn extends JFrame {
         passWord =      new JPasswordField();
         signInButton =  new JButton();
 
+        // Some settings...
         setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setTitle("Not Star Craft! v0.1");
@@ -66,6 +76,8 @@ public class SignIn extends JFrame {
         panel.setLayout(null);
         panel.setBackground(Color.WHITE);
 
+        // The code bellow here is self explanatory
+        // Not going to comment it
         title.          setText("Log In");
         userNameLabel.  setText("Username:");
         passWordLabel.  setText("Password:");
@@ -106,6 +118,7 @@ public class SignIn extends JFrame {
         signInButton.   setBounds(75, 180, 90, 30);
         signUpLabel.    setBounds(10, 220, 210, 25);
 
+        // Sets the enter listener in the password field
         passWord.addKeyListener(new KeyAdapter() {
 
             @Override
@@ -117,6 +130,7 @@ public class SignIn extends JFrame {
             
         });
         
+        // Sets the click listener in the login button
         signInButton.addActionListener(new ActionListener() {
 
             @Override
@@ -126,6 +140,7 @@ public class SignIn extends JFrame {
 
         });
 
+        // Sets the listener in the sign up button
         signUpLabel.addMouseListener(new MouseAdapter() {
 
             @Override
@@ -142,6 +157,7 @@ public class SignIn extends JFrame {
 
     }
 
+    // Attempts to sign in
     private void signIn() {
 
         String user = userName.getText();
@@ -153,12 +169,13 @@ public class SignIn extends JFrame {
                 throw new EmptyFieldException();
 
             if (SignInDAO.isUserValid(user, password)) {
-                Player player = SignInDAO.getPlayer(user);
-                
-                System.out.println(player.getName());
-                System.out.println(player.getBirthDate().toString());
-                System.out.println(player.getEmail());
-                
+//                Player player = SignInDAO.getPlayer(user);
+//                
+//                System.out.println(player.getName());
+//                System.out.println(player.getBirthDate().toString());
+//                System.out.println(player.getEmail());
+                this.dispose();
+                new Game();
             }
             else {
                 throw new FailedLoginException();
@@ -170,6 +187,8 @@ public class SignIn extends JFrame {
             JOptionPane.showMessageDialog(this, "Could not connect to the server!", "SignIn", JOptionPane.ERROR_MESSAGE);
         } catch (FailedLoginException ex) {
             JOptionPane.showMessageDialog(this, "Incorrect user or password!", "SignIn", JOptionPane.ERROR_MESSAGE);
+        } catch (SlickException ex) {
+            Logger.getLogger(SignIn.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }

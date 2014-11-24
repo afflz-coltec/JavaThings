@@ -15,7 +15,7 @@ import org.newdawn.slick.tiled.TiledMap;
 
 /**
  * 
- * @author Sammy Guergachi <sguergachi at gmail.com>
+ * @author Pedro
  */
 public class Map extends BasicGameState {
 

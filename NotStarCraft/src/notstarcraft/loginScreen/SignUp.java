@@ -34,7 +34,7 @@ import notstarcraft.exceptions.WrongPasswordException;
 
 /**
  * 
- * @author Sammy Guergachi <sguergachi at gmail.com>
+ * @author Pedro
  */
 public class SignUp extends JFrame {
     
@@ -231,34 +231,34 @@ public class SignUp extends JFrame {
         
     }
     
-    public static void main(String[] args) {
-        
-        final SignUp su = new SignUp();
-        
-        try {
-
-            javax.swing.UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(SignIn.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            Logger.getLogger(SignIn.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(SignIn.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (UnsupportedLookAndFeelException ex) {
-            Logger.getLogger(SignIn.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        java.awt.EventQueue.invokeLater(new Runnable() {
-
-            @Override
-            public void run() {
-                su.setVisible(true);
-            }
-
-        });
-        
-    }
+//    public static void main(String[] args) {
+//        
+//        final SignUp su = new SignUp();
+//        
+//        try {
+//
+//            javax.swing.UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+//
+//        } catch (ClassNotFoundException ex) {
+//            Logger.getLogger(SignIn.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (InstantiationException ex) {
+//            Logger.getLogger(SignIn.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (IllegalAccessException ex) {
+//            Logger.getLogger(SignIn.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (UnsupportedLookAndFeelException ex) {
+//            Logger.getLogger(SignIn.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//
+//        java.awt.EventQueue.invokeLater(new Runnable() {
+//
+//            @Override
+//            public void run() {
+//                su.setVisible(true);
+//            }
+//
+//        });
+//        
+//    }
     
     private JPanel panel;
     private JLabel titleLabel, nameLabel, usernameLabel, passwordLabel,confirmPasswordLabel, emailLabel, genderLabel, birthDateLabel, rightSlash1, rightSlash2, goSignInLabel;

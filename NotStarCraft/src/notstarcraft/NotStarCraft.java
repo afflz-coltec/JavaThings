@@ -13,7 +13,7 @@ import org.newdawn.slick.state.StateBasedGame;
 
 /**
  *
- * @author Sammy Guergachi <sguergachi at gmail.com>
+ * @author Pedro
  */
 public class NotStarCraft extends StateBasedGame {
 
@@ -24,7 +24,7 @@ public class NotStarCraft extends StateBasedGame {
         super(name);
         this.gameWidth = gameWidth;
         this.gameHeight = gameHeight;
-        this.addState(new BattleField(this.gameWidth,this.gameHeight));
+        this.addState(new BattleField());
     }
 
     @Override

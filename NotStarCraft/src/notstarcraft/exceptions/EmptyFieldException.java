@@ -8,7 +8,7 @@ package notstarcraft.exceptions;
 
 /**
  * 
- * @author Sammy Guergachi <sguergachi at gmail.com>
+ * @author Pedro
  */
 public class EmptyFieldException extends Exception {
 

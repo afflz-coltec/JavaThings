@@ -6,33 +6,31 @@
 
 package notstarcraft.game.ships;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.Iterator;
+import notstarcraft.game.ships.projectile.Projectile;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.geom.Rectangle;
+import org.newdawn.slick.geom.Shape;
+import org.newdawn.slick.geom.Transform;
 import org.newdawn.slick.geom.Vector2f;
 import org.newdawn.slick.state.StateBasedGame;
 
 /**
  * 
- * @author Sammy Guergachi <sguergachi at gmail.com>
+ * @author Pedro
  */
 public abstract class Ship {
 
-    protected Image shipImage;
+    static {
+        
+    }
     
-    protected Image shipUp;
-    protected Image shipDown;
-    protected Image shipRight;
-    protected Image shipLeft;
-    protected Image shipUpRight;
-    protected Image shipUpLeft;
-    protected Image shipDownRight;
-    protected Image shipDownLeft;
+    protected Image shipImage;
     
     protected float movingToX;
     protected float movingToY;
@@ -43,9 +41,11 @@ public abstract class Ship {
     protected Vector2f position;
     protected Vector2f speed;
     
-    protected Rectangle hitBox;
+    protected Shape defaultHitBox;
+    protected Shape hitBox;
     
-//    protected boolean isSelected = false;
+    protected ArrayList<Projectile> projectiles;
+    
     protected boolean isMoving = false;
 
     protected Ship(float centerX, float centerY) {
@@ -57,9 +57,15 @@ public abstract class Ship {
         this.width = this.shipImage.getWidth();
         this.height = this.shipImage.getHeight();
         
+        defaultHitBox = new Rectangle(0, 0, width*0.7f, height*0.7f);
+        defaultHitBox.setCenterX(centerX);
+        defaultHitBox.setCenterY(centerY);
+        
         hitBox = new Rectangle(0, 0, width*0.9f, height*0.9f);
         hitBox.setCenterX(centerX);
         hitBox.setCenterY(centerY);
+        
+        projectiles = new ArrayList<>();
         
     }
     
@@ -71,7 +77,27 @@ public abstract class Ship {
         this.position.y = y;
     }
     
-    public void moveShip(int delta) {
+    public float getCenterX() {
+        return this.position.x;
+    }
+    
+    public float getCenterY() {
+        return this.position.y;
+    }
+    
+    public float getWidth() {
+        return this.width;
+    }
+
+    public float getHeight() {
+        return this.height;
+    }
+    
+    public boolean isInside( Shape rect ) {
+        return hitBox.intersects(rect);
+    }
+    
+    private void moveShip(int delta) {
         
         boolean checkedY = false;
         boolean checkedX = false;
@@ -104,79 +130,25 @@ public abstract class Ship {
     
     public void moveTo(int posX, int posY) {
         
-//        if( isSelected ) {
-            this.movingToX = posX;
-            this.movingToY = posY;
-            
-            float deltaY = movingToY-position.y;
-            float deltaX = movingToX-position.x;
-            float rad = (float) Math.atan2(deltaY, deltaX);
-            float alfa = (float)Math.toDegrees(rad);
-            this.shipImage = getOriginalImage();
-            shipImage.rotate(alfa);
+        this.movingToX = posX;
+        this.movingToY = posY;
 
-            this.speed = new Vector2f(getSpeed()*(float)Math.cos(rad), getSpeed()*(float)Math.sin(rad));
-            
-            this.isMoving = true;
-//        }
-        
-    }
-    
-//    public void setSelected(boolean isSelected) {
-//        this.isSelected = isSelected;
-//    }
-
-    public float getCenterX() {
-        return this.position.x;
-    }
-    
-    public float getCenterY() {
-        return this.position.y;
-    }
-    
-    public float getWidth() {
-        return this.width;
-    }
-
-    public float getHeight() {
-        return this.height;
-    }
-    
-    public boolean isInside( float x, float y ) {
-        return hitBox.contains(x, y);
-    }
-    
-    public final void update(GameContainer gc, StateBasedGame game, int delta) throws SlickException {
-        
-        Input input = gc.getInput();
-        
-        if( input.isKeyDown(Input.KEY_W) ) {
-            this.position.y -= delta/3.0f;
-        }
-        if( input.isKeyDown(Input.KEY_S) ) {
-            this.position.y += delta/3.0f;
-        }
-        
-        if( input.isKeyDown(Input.KEY_D) ) {
-            this.position.x += delta/3.0f;
-        }
-        if( input.isKeyDown(Input.KEY_A) ) {
-            this.position.x -= delta/3.0f;
-        }
-        
-        float deltaY = input.getMouseY()-position.y;
-        float deltaX = input.getMouseX()-position.x;
-        
+        float deltaY = movingToY-position.y;
+        float deltaX = movingToX-position.x;
         float rad = (float) Math.atan2(deltaY, deltaX);
         float alfa = (float)Math.toDegrees(rad);
-        
-        this.shipImage = getOriginalImage().copy();
+        this.shipImage = getOriginalImage();
         shipImage.rotate(alfa);
         
-        hitBox.setCenterX(this.position.x);
-        hitBox.setCenterY(this.position.y);
+        this.speed = new Vector2f(getSpeed()*(float)Math.cos(rad), getSpeed()*(float)Math.sin(rad));
+
+        this.isMoving = true;
         
     }
+
+    public abstract void update(GameContainer gc, StateBasedGame game, int delta) throws SlickException;
+    
+    protected abstract void fireBeam(float posX, float posY);
     
     protected abstract Image getOriginalImage();
     

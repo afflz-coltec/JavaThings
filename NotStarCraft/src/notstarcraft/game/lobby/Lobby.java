@@ -15,7 +15,7 @@ import org.newdawn.slick.state.StateBasedGame;
 
 /**
  * 
- * @author Sammy Guergachi <sguergachi at gmail.com>
+ * @author Pedro
  */
 public class Lobby extends BasicGameState {
 

@@ -16,7 +16,7 @@ import org.newdawn.slick.gui.GUIContext;
 
 /**
  * 
- * @author Sammy Guergachi <sguergachi at gmail.com>
+ * @author Pedro
  */
 public class History extends AbstractComponent {
 
