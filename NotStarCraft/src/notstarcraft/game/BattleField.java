@@ -7,6 +7,7 @@
 package notstarcraft.game;
 
 import java.util.ArrayList;
+import notstarcraft.game.ships.BlueShip;
 import notstarcraft.game.ships.RedShip;
 import notstarcraft.game.ships.Ship;
 import org.newdawn.slick.GameContainer;
@@ -14,10 +15,8 @@ import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
-import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
-import org.newdawn.slick.tiled.TiledMap;
 
 /**
  * 
@@ -25,11 +24,11 @@ import org.newdawn.slick.tiled.TiledMap;
  */
 public class BattleField extends BasicGameState {
     
-    public static final int STATE_ID = 1;
+    public static final int STATE_ID = 2;
     
     private Image background;
     
-    private RedShip redShip;
+    private Ship redShip;
     
     private int mouseX;
     private int mouseY;
@@ -50,7 +49,7 @@ public class BattleField extends BasicGameState {
         
         background = new Image("res/map/space-red.png");
         
-        redShip = new RedShip(640,384);
+        redShip = new BlueShip(640,384);
         
         shipList = new ArrayList<>();
         shipList.add(redShip);

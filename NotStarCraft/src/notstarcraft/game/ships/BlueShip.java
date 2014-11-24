@@ -35,6 +35,8 @@ public class BlueShip extends Ship {
     private static Image blueShip;
     private static final float speed = 1.0f;
     
+    private static final int MAX_HP = 30;
+    
     public BlueShip(float centerX, float centerY) {
         super(centerX, centerY);
     }
