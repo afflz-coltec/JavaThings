@@ -41,10 +41,12 @@ public abstract class Projectile {
         
         this.position = new Vector2f(centerX, centerY);
         
+        // Sets up the hitbox
         this.hitbox = new Rectangle(0, 0, projectile.getWidth()*0.5f, projectile.getHeight()*0.5f);
         this.hitbox.setCenterX(position.x);
         this.hitbox.setCenterY(position.y);
         
+        // More math...
         float deltaY = goToY-centerY;
         float deltaX = goToX-centerX;
         
@@ -55,6 +57,8 @@ public abstract class Projectile {
         this.hitbox = hitbox.transform(Transform.createRotateTransform(rad, position.x, position.y));
         
         speed = new Vector2f(10.0f*(float)Math.cos(rad), 10.0f*(float)Math.sin(rad));
+        
+        position.add(new Vector2f(50.0f*(float)Math.cos(rad), 50.0f*(float)Math.sin(rad)));
         
         isActive = true;
         
@@ -76,11 +80,17 @@ public abstract class Projectile {
     }
     
     public final void render(GameContainer container, Graphics g) {
-        projectile.drawCentered(position.x, position.y);
+        projectile.drawCentered(position.x, position.y); // Render the projectile
+        
+        // Render the hitbox
 //        g.setLineWidth(2);
 //        g.draw(hitbox);
     }
     
+    /**
+     * Return the current state of a projectile
+     * @return <code>true</code> if active, <code>false</code> otherwise.
+     */
     public boolean isActive() {
         return this.isActive;
     }

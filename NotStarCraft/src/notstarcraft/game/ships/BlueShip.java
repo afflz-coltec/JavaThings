@@ -8,7 +8,7 @@ package notstarcraft.game.ships;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import notstarcraft.game.ships.projectile.CianoBeam;
+import notstarcraft.game.ships.projectile.RedBeam;
 import notstarcraft.game.ships.projectile.Projectile;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
@@ -37,6 +37,8 @@ public class BlueShip extends Ship {
     
     private static final int MAX_HP = 30;
     
+    private boolean isActive = true;
+    
     public BlueShip(float centerX, float centerY) {
         super(centerX, centerY);
     }
@@ -61,7 +63,7 @@ public class BlueShip extends Ship {
 
     @Override
     protected void fireBeam(float posX, float posY) {
-        this.projectiles.add(new CianoBeam(position.x, position.y, posX, posY));
+        this.projectiles.add(new RedBeam(position.x, position.y, posX, posY));
     }
 
     @Override

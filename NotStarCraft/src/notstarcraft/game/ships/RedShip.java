@@ -9,14 +9,13 @@ package notstarcraft.game.ships;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import notstarcraft.game.ships.projectile.CianoBeam;
+import notstarcraft.game.ships.projectile.RedBeam;
 import notstarcraft.game.ships.projectile.Projectile;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
-import org.newdawn.slick.SpriteSheet;
 import org.newdawn.slick.geom.Transform;
 import org.newdawn.slick.state.StateBasedGame;
 
@@ -41,6 +40,9 @@ public class RedShip extends Ship {
     
     private static Image redShip;
     private static final float speed = 1;
+    
+    private static final float FIRE_RATE = 10.0f;
+    private float fire_delta = 0;
     
     /**
      * Constructor for a Red Ship. In this case, this is the player ship.
@@ -115,10 +117,13 @@ public class RedShip extends Ship {
                 iterator.remove();
         }
         
+        fire_delta += delta;
+        
         // If the left mouse button is pressed, I fire beams like there's no tomorrow by adding more projectiles
         // to the projectiles list.
-        if( input.isMouseButtonDown(Input.MOUSE_LEFT_BUTTON) ) {
+        if( fire_delta > FIRE_RATE && input.isMouseButtonDown(Input.MOUSE_LEFT_BUTTON) ) {
             fireBeam(input.getMouseX(), input.getMouseY());
+            fire_delta = 0;
         }
         
     }
@@ -134,7 +139,8 @@ public class RedShip extends Ship {
 
     @Override
     protected void fireBeam(float posX, float posY) {
-        this.projectiles.add(new CianoBeam(position.x, position.y, posX, posY));
+        Projectile redBeam = new RedBeam(position.x, position.y, posX, posY);
+        this.projectiles.add(redBeam);
     }
     
 }

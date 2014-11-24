@@ -15,21 +15,21 @@ import org.newdawn.slick.SlickException;
  * 
  * @author Pedro
  */
-public class CianoBeam extends Projectile {
+public class RedBeam extends Projectile {
 
     static {
         
         try {
-            cianoBeam = new Image("res/sprites/lasers.png").getSubImage(29, 23, 35, 20);
+            cianoBeam = new Image("res/sprites/beams.png").getSubImage(280, 36, 27, 19);
         } catch (SlickException ex) {
-            Logger.getLogger(CianoBeam.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(RedBeam.class.getName()).log(Level.SEVERE, null, ex);
         }
         
     }
     
     private static Image cianoBeam;
     
-    public CianoBeam(float centerX, float centerY, float goToX, float goToY) {
+    public RedBeam(float centerX, float centerY, float goToX, float goToY) {
         super(centerX, centerY, goToX, goToY);
     }
 

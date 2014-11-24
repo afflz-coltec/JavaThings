@@ -7,7 +7,6 @@
 package notstarcraft.game;
 
 import java.util.ArrayList;
-import notstarcraft.game.ships.BlueShip;
 import notstarcraft.game.ships.RedShip;
 import notstarcraft.game.ships.Ship;
 import org.newdawn.slick.GameContainer;
@@ -25,6 +24,8 @@ import org.newdawn.slick.state.StateBasedGame;
 public class BattleField extends BasicGameState {
     
     public static final int STATE_ID = 2;
+    
+    private static final float SPAWN_TIME = 200.0f;
     
     private Image background;
     
@@ -49,7 +50,7 @@ public class BattleField extends BasicGameState {
         
         background = new Image("res/map/space-red.png");
         
-        redShip = new BlueShip(640,384);
+        redShip = new RedShip(640,384);
         
         shipList = new ArrayList<>();
         shipList.add(redShip);
