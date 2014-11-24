@@ -17,8 +17,8 @@ import org.newdawn.slick.SlickException;
  */
 public class Game {
 
-    static final int WIDTH = 1280;
-    static final int HEIGHT = 768;
+    public static final int WIDTH = 1280;
+    public static final int HEIGHT = 768;
 
     /**
      * Instantiate a new Game.

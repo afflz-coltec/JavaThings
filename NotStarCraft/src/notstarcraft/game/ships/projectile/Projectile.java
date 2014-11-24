@@ -35,6 +35,10 @@ public abstract class Projectile {
     
     protected boolean isActive;
     
+    public Shape getHitBox() {
+        return this.hitbox;
+    }
+    
     protected Projectile(float centerX, float centerY, float goToX, float goToY) {
         
         projectile = getProjectileImage();
@@ -72,10 +76,10 @@ public abstract class Projectile {
             hitbox.setCenterX(position.x);
             hitbox.setCenterY(position.y);
             timeLiving += delta;
-        }
-        
-        if( timeLiving > LIFE_TIME )
+            
+            if( timeLiving > LIFE_TIME )
             isActive = false;
+        }
         
     }
     
@@ -93,6 +97,10 @@ public abstract class Projectile {
      */
     public boolean isActive() {
         return this.isActive;
+    }
+    
+    public void setActive(boolean isActive) {
+        this.isActive = isActive;
     }
     
     public boolean testCollision(Shape hitbox) {

@@ -97,7 +97,7 @@ public abstract class Ship {
         return hitBox.intersects(rect);
     }
     
-    private void moveShip(int delta) {
+    protected void moveShip(int delta) {
         
         boolean checkedY = false;
         boolean checkedX = false;
@@ -128,7 +128,7 @@ public abstract class Ship {
         
     }
     
-    public void moveTo(int posX, int posY) {
+    public void moveTo(float posX, float posY) {
         
         this.movingToX = posX;
         this.movingToY = posY;
@@ -141,6 +141,7 @@ public abstract class Ship {
         shipImage.rotate(alfa);
         
         this.speed = new Vector2f(getSpeed()*(float)Math.cos(rad), getSpeed()*(float)Math.sin(rad));
+        hitBox = defaultHitBox.transform(Transform.createRotateTransform(rad, position.x, position.y));
 
         this.isMoving = true;
         

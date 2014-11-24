@@ -7,6 +7,10 @@
 package notstarcraft.game;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Random;
+import notstarcraft.Game;
+import notstarcraft.game.ships.BlueShip;
 import notstarcraft.game.ships.RedShip;
 import notstarcraft.game.ships.Ship;
 import org.newdawn.slick.GameContainer;
@@ -29,12 +33,12 @@ public class BattleField extends BasicGameState {
     
     private Image background;
     
-    private Ship redShip;
+    private RedShip redShip;
     
     private int mouseX;
     private int mouseY;
     
-    private ArrayList<Ship> shipList;
+    private ArrayList<BlueShip> enemiesList;
 
     public BattleField() { }
     
@@ -52,8 +56,10 @@ public class BattleField extends BasicGameState {
         
         redShip = new RedShip(640,384);
         
-        shipList = new ArrayList<>();
-        shipList.add(redShip);
+        enemiesList = new ArrayList<>();
+        for(int i=0;i<5;i++) {
+            enemiesList.add(new BlueShip(new Random().nextInt(Game.WIDTH), new Random().nextInt(Game.HEIGHT), redShip));
+        }
     }
 
     @Override
@@ -63,6 +69,9 @@ public class BattleField extends BasicGameState {
         background.draw(0, 0); // Draw the background image
         
         redShip.render(container, g); // Draw the player ship
+        
+        for(Ship s : enemiesList)
+            s.render(container, g);
         
         g.drawString("X: " + mouseX + "\nY: " + mouseY, 1200, 100); // Draw the mouse position
         
@@ -74,6 +83,18 @@ public class BattleField extends BasicGameState {
         Input input = gc.getInput(); // Gets the input stream
         
         redShip.update(gc, game, delta); // Updates the player ship
+        
+        Iterator<BlueShip> it = enemiesList.iterator();
+        
+        while(it.hasNext()) {
+            
+            BlueShip bs = it.next();
+            
+            if(bs.isActive())
+                bs.update(gc, game, delta);
+            else
+                it.remove();
+        }
         
         mouseX = input.getMouseX(); // Update the x mouse position
         mouseY = input.getMouseY(); // Update the y mouse position

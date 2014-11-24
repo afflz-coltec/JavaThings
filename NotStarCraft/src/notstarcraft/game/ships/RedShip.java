@@ -6,6 +6,7 @@
 
 package notstarcraft.game.ships;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -54,6 +55,25 @@ public class RedShip extends Ship {
         super(centerX,centerY);
     }
 
+    protected Image getOriginalImage() {
+        return redShip.copy();
+    }
+    
+    public ArrayList<Projectile> getProjectiles() {
+        return this.projectiles;
+    }
+    
+    @Override
+    public float getSpeed() {
+        return speed;
+    }
+    
+    @Override
+    protected void fireBeam(float posX, float posY) {
+        Projectile redBeam = new RedBeam(position.x, position.y, posX, posY);
+        this.projectiles.add(redBeam);
+    }
+    
     @Override
     public void render(GameContainer container, Graphics g) throws SlickException {
         for(Projectile p : projectiles)
@@ -126,21 +146,6 @@ public class RedShip extends Ship {
             fire_delta = 0;
         }
         
-    }
-
-    protected Image getOriginalImage() {
-        return redShip.copy();
-    }
-    
-    @Override
-    public float getSpeed() {
-        return speed;
-    }
-
-    @Override
-    protected void fireBeam(float posX, float posY) {
-        Projectile redBeam = new RedBeam(position.x, position.y, posX, posY);
-        this.projectiles.add(redBeam);
     }
     
 }

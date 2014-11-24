@@ -33,16 +33,24 @@ public class BlueShip extends Ship {
     }
     
     private static Image blueShip;
-    private static final float speed = 1.0f;
+    private static final float speed = 0.5f;
     
-    private static final int MAX_HP = 30;
+    private static final int MAX_HP = 500;
+    private int damageTaken = MAX_HP;
     
     private boolean isActive = true;
     
-    public BlueShip(float centerX, float centerY) {
+    private RedShip target;
+    
+    public BlueShip(float centerX, float centerY, RedShip target) {
         super(centerX, centerY);
+        this.target = target;
     }
 
+    public boolean isActive() {
+        return this.isActive;
+    }
+    
     @Override
     protected Image getOriginalImage() {
         return blueShip.copy();
@@ -50,10 +58,8 @@ public class BlueShip extends Ship {
 
     @Override
     public void render(GameContainer container, Graphics g) throws SlickException {
-        for( Projectile p : projectiles )
-            p.render(container, g);
-        
         shipImage.drawCentered(position.x, position.y);
+        g.draw(hitBox);
     }
 
     @Override
@@ -63,11 +69,29 @@ public class BlueShip extends Ship {
 
     @Override
     protected void fireBeam(float posX, float posY) {
-        this.projectiles.add(new RedBeam(position.x, position.y, posX, posY));
+//        this.projectiles.add(new RedBeam(position.x, position.y, posX, posY));
     }
 
     @Override
     public void update(GameContainer gc, StateBasedGame game, int delta) throws SlickException {
+        
+        if( isActive ) {
+            moveTo(target.getCenterX(), target.getCenterY());
+            moveShip(delta);
+            hitBox.setCenterX(position.x);
+            hitBox.setCenterY(position.y);
+        }
+        
+        for( Projectile p : target.getProjectiles() ) {
+            if( p.getHitBox().intersects(hitBox) ) {
+                damageTaken -= 10;
+                p.setActive(false);
+                
+                if(damageTaken == 0)
+                    isActive = false;
+                
+            }
+        }
         
     }
 
