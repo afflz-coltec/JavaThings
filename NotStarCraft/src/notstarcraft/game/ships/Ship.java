@@ -157,4 +157,6 @@ public abstract class Ship {
     
     public abstract float getSpeed();
     
+    public abstract Shape getHitBox();
+    
 }

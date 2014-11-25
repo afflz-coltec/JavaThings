@@ -6,6 +6,8 @@
 package notstarcraft;
 
 import notstarcraft.game.BattleField;
+import notstarcraft.game.lobby.GameOver;
+import notstarcraft.game.lobby.Menu;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.StateBasedGame;
@@ -22,13 +24,15 @@ public class NotStarCraft extends StateBasedGame {
      */
     public NotStarCraft(String name) {
         super(name);
+        this.addState(new Menu());
+        this.addState(new GameOver());
         this.addState(new BattleField());
     }
 
     @Override
     public void initStatesList(GameContainer gc) throws SlickException {
-        this.getState(BattleField.STATE_ID).init(gc, this);
-        this.enterState(BattleField.STATE_ID);
+        this.getState(Menu.STATE_ID).init(gc, this);
+        this.enterState(Menu.STATE_ID);
     }
     
 }

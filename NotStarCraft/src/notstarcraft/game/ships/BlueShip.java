@@ -8,12 +8,12 @@ package notstarcraft.game.ships;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import notstarcraft.game.ships.projectile.RedBeam;
 import notstarcraft.game.ships.projectile.Projectile;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
+import org.newdawn.slick.geom.Shape;
 import org.newdawn.slick.state.StateBasedGame;
 
 /**
@@ -35,7 +35,7 @@ public class BlueShip extends Ship {
     private static Image blueShip;
     private static final float speed = 0.5f;
     
-    private static final int MAX_HP = 500;
+    private static final int MAX_HP = 200;
     private int damageTaken = MAX_HP;
     
     private boolean isActive = true;
@@ -59,7 +59,6 @@ public class BlueShip extends Ship {
     @Override
     public void render(GameContainer container, Graphics g) throws SlickException {
         shipImage.drawCentered(position.x, position.y);
-        g.draw(hitBox);
     }
 
     @Override
@@ -83,8 +82,8 @@ public class BlueShip extends Ship {
         }
         
         for( Projectile p : target.getProjectiles() ) {
-            if( p.getHitBox().intersects(hitBox) ) {
-                damageTaken -= 10;
+            if( p.isActive() && p.getHitBox().intersects(hitBox) ) {
+                damageTaken -= p.getDamage();
                 p.setActive(false);
                 
                 if(damageTaken == 0)
@@ -93,6 +92,11 @@ public class BlueShip extends Ship {
             }
         }
         
+    }
+
+    @Override
+    public Shape getHitBox() {
+        return this.hitBox;
     }
 
 }

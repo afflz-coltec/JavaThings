@@ -28,6 +28,7 @@ public class RedBeam extends Projectile {
     }
     
     private static Image cianoBeam;
+    private static int DAMAGE_VALUE = 10;
     
     public RedBeam(float centerX, float centerY, float goToX, float goToY) {
         super(centerX, centerY, goToX, goToY);
@@ -36,6 +37,11 @@ public class RedBeam extends Projectile {
     @Override
     protected Image getProjectileImage() {
         return cianoBeam.copy();
+    }
+
+    @Override
+    public int getDamage() {
+        return DAMAGE_VALUE;
     }
 
 }

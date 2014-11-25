@@ -1,8 +1,5 @@
 package notstarcraft;
 
-import notstarcraft.NotStarCraft;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.newdawn.slick.AppGameContainer;
 import org.newdawn.slick.SlickException;
 
@@ -18,7 +15,7 @@ import org.newdawn.slick.SlickException;
 public class Game {
 
     public static final int WIDTH = 1280;
-    public static final int HEIGHT = 768;
+    public static final int HEIGHT = 720;
 
     /**
      * Instantiate a new Game.

@@ -6,43 +6,50 @@
 
 package notstarcraft.game.lobby;
 
-import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.Image;
+import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
 
 /**
  * 
- * @author Pedro
+ * @author Sammy Guergachi <sguergachi at gmail.com>
  */
-public class Lobby extends BasicGameState {
+public class GameOver extends BasicGameState {
 
-    public static final int STATE_ID = 3;
+    public static final int STATE_ID = 4;
     
-    private History history;
-
+    private Image background;
+    
     @Override
     public int getID() {
-        return Lobby.STATE_ID;
+        return STATE_ID;
     }
 
     @Override
     public void init(GameContainer container, StateBasedGame game) throws SlickException {
-        history = new History(container);
-        history.setLocation(100, 100);
+        background = new Image("res/images/game-over.png");
     }
 
     @Override
     public void render(GameContainer container, StateBasedGame game, Graphics g) throws SlickException {
-        g.setBackground(Color.white);
-        history.render(container, g);
+        background.draw(0, 0);
     }
 
     @Override
     public void update(GameContainer container, StateBasedGame game, int delta) throws SlickException {
         
+        Input input = container.getInput();
+        
+        if( input.isMousePressed(Input.MOUSE_LEFT_BUTTON) ) {
+            
+            
+            
+        }
+        
     }
-    
+
 }

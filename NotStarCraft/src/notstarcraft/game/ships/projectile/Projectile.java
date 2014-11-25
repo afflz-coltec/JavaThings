@@ -111,4 +111,6 @@ public abstract class Projectile {
     
     protected abstract Image getProjectileImage();
     
+    public abstract int getDamage();
+    
 }

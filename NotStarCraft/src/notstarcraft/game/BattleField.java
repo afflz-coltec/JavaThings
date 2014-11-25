@@ -9,7 +9,7 @@ package notstarcraft.game;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
-import notstarcraft.Game;
+import notstarcraft.game.lobby.GameOver;
 import notstarcraft.game.ships.BlueShip;
 import notstarcraft.game.ships.RedShip;
 import notstarcraft.game.ships.Ship;
@@ -20,6 +20,8 @@ import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
+import org.newdawn.slick.state.transition.FadeInTransition;
+import org.newdawn.slick.state.transition.FadeOutTransition;
 
 /**
  * 
@@ -29,11 +31,16 @@ public class BattleField extends BasicGameState {
     
     public static final int STATE_ID = 2;
     
-    private static final float SPAWN_TIME = 200.0f;
+    private static final float SPAWN_TIME = 2000.0f;
     
     private Image background;
     
     private RedShip redShip;
+    
+    private float timePassed = 0;
+    
+    private int level = 1;
+    private boolean isGameOver;
     
     private int mouseX;
     private int mouseY;
@@ -53,13 +60,21 @@ public class BattleField extends BasicGameState {
         // Init all the members
         
         background = new Image("res/map/space-red.png");
-        
         redShip = new RedShip(640,384);
-        
         enemiesList = new ArrayList<>();
-        for(int i=0;i<5;i++) {
-            enemiesList.add(new BlueShip(new Random().nextInt(Game.WIDTH), new Random().nextInt(Game.HEIGHT), redShip));
+        
+        level = 1;
+        
+        for(int i=0; i<level*5; i++) {
+            int randH = new Random().nextInt(2);
+                
+            int randX = new Random().nextInt(1280);
+            int randY = randH == 0 ? new Random().nextInt(50) + 720 : new Random().nextInt(50)*(-1);
+
+            enemiesList.add(new BlueShip(randX, randY, redShip));
         }
+        
+        isGameOver = false;
     }
 
     @Override
@@ -73,6 +88,7 @@ public class BattleField extends BasicGameState {
         for(Ship s : enemiesList)
             s.render(container, g);
         
+        g.drawString("Level " + level, 1200, 50);
         g.drawString("X: " + mouseX + "\nY: " + mouseY, 1200, 100); // Draw the mouse position
         
     }
@@ -80,9 +96,15 @@ public class BattleField extends BasicGameState {
     @Override
     public void update(GameContainer gc, StateBasedGame game, int delta) throws SlickException {
         
+        timePassed += delta;
+        
         Input input = gc.getInput(); // Gets the input stream
         
-        redShip.update(gc, game, delta); // Updates the player ship
+        if( input.isKeyPressed(Input.KEY_ESCAPE) )
+            gc.setPaused(!gc.isPaused());
+        
+        if(!gc.isPaused())
+            redShip.update(gc, game, delta); // Updates the player ship
         
         Iterator<BlueShip> it = enemiesList.iterator();
         
@@ -96,6 +118,29 @@ public class BattleField extends BasicGameState {
                 it.remove();
         }
         
+        for(BlueShip bs : enemiesList) {
+            if( redShip.getHitBox().intersects(bs.getHitBox()) ) {
+                isGameOver = true;
+            }
+        }
+        
+        if(enemiesList.isEmpty()) {
+            level++;
+            for (int i = 0; i < level*5; i++) {
+                int randH = new Random().nextInt(2);
+                
+                int randX = new Random().nextInt(1280);
+                int randY = randH == 0 ? new Random().nextInt(50) + 720 : new Random().nextInt(50)*(-1);
+                
+                enemiesList.add(new BlueShip(randX, randY, redShip));
+            }
+            
+        }
+            
+        if(isGameOver) {
+            game.enterState(GameOver.STATE_ID, new FadeOutTransition(), new FadeInTransition());
+        }
+            
         mouseX = input.getMouseX(); // Update the x mouse position
         mouseY = input.getMouseY(); // Update the y mouse position
         
