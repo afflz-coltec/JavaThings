@@ -33,7 +33,7 @@ public class RedShip extends Ship {
     static {
         
         try {
-            redShip = new Image("res/sprites/ship2.png").getScaledCopy(0.55f);
+            redShip = new Image("res/sprites/destroyer.png").getScaledCopy(0.23f);
         } catch (SlickException ex) {
             Logger.getLogger(RedShip.class.getName()).log(Level.SEVERE, null, ex);
         }
