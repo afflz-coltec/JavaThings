@@ -13,6 +13,7 @@ import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
+import org.newdawn.slick.state.transition.FadeOutTransition;
 
 /**
  * 
@@ -45,8 +46,15 @@ public class GameOver extends BasicGameState {
         Input input = container.getInput();
         
         if( input.isMousePressed(Input.MOUSE_LEFT_BUTTON) ) {
-            
-            
+            int x = input.getMouseX();
+            int y = input.getMouseY();
+            // 312 484 458 532
+            if( x >= 312 && x <= 458 && y >= 484 && y <= 532 ) {
+                game.enterState(Menu.STATE_ID, new FadeOutTransition(), new FadeOutTransition());
+            }
+            else if( x >= 845 && x <= 956 && y >= 484 && y <= 532 ) {
+                System.exit(0);
+            }
             
         }
         
